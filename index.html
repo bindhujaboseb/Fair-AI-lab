@@ -206,7 +206,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
     <p class="sub">Today you become an <b>AI Fairness Detective</b>. Log in to begin.</p>
     <div class="grid2">
       <div style="grid-column:1/-1"><label class="f">Your full name</label><input type="text" id="inName" maxlength="40" placeholder="e.g. Aisha Rahman" autocomplete="off"></div>
-      <div><label class="f">Class</label><select id="inCls"><option value="">– Choose –</option><option>VI</option><option>VII</option><option>VIII</option></select></div>
+      <div><label class="f">Class</label><div style="padding:11px 12px;border:2px solid var(--line);border-radius:11px;background:#F8FAFC;font-weight:700">Grade VIII</div></div>
       <div><label class="f">Division</label><select id="inDiv"><option value="">– Choose –</option></select></div>
     </div>
     <p id="loginMsg" style="color:var(--red);font-weight:600"></p>
@@ -933,15 +933,15 @@ $('btnToMain').onclick = () => { if (PI[S.phase] < PI.main) setPhase('main'); el
 /* ---------- login & buttons ---------- */
 $('inDiv').innerHTML += DIVS.map(d => `<option>${d}</option>`).join('');
 $('btnLogin').onclick = () => {
-  const n = $('inName').value.trim(), c = $('inCls').value, d = $('inDiv').value;
-  if (n.length < 2 || !c || !d) { $('loginMsg').textContent = 'Please fill in your name, class and division.'; return; }
+  const n = $('inName').value.trim(), c = 'VIII', d = $('inDiv').value;
+  if (n.length < 2 || !c || !d) { $('loginMsg').textContent = 'Please type your name and choose your division.'; return; }
   $('loginMsg').textContent = '';
-  $('confirmTbl').innerHTML = `<tr><td>Name</td><td><b>${esc(n)}</b></td></tr><tr><td>Class</td><td><b>${c}</b></td></tr><tr><td>Division</td><td><b>${d}</b></td></tr>`;
+  $('confirmTbl').innerHTML = `<tr><td>Name</td><td><b>${esc(n)}</b></td></tr><tr><td>Class</td><td><b>Grade ${c}</b></td></tr><tr><td>Division</td><td><b>${d}</b></td></tr>`;
   show('confirm');
 };
 $('btnBack').onclick = () => show('login');
 $('btnConfirm').onclick = () => {
-  S = fresh(); S.name = $('inName').value.trim().replace(/[<>]/g, ''); S.cls = $('inCls').value; S.div = $('inDiv').value;
+  S = fresh(); S.name = $('inName').value.trim().replace(/[<>]/g, ''); S.cls = 'VIII'; S.div = $('inDiv').value;
   S.id = (S.cls + '-' + S.div + '-' + S.name).toLowerCase().replace(/\s+/g, '');
   post('login'); lastStage = 'starter';
   setPhase('starter');
