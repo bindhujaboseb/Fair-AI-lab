@@ -9,8 +9,9 @@
   Topic: Identifying Bias in Datasets – Building Fair and Inclusive AI
   Sharjah Indian School, Juwaiza – Bindhuja Bose B
 
+  Upload this file to GitHub as  index.html  (it replaces the old one).
   SETUP: paste your Google Apps Script Web app link into  const SHEET_URL = '';  (near the top of the script).
-  PINs are NOT stored in this page – change them in the "Settings" tab of the Google Sheet.
+  The same Web app link opens the Teacher Dashboard. PINs are changed in the "Settings" tab of the Google Sheet.
 -->
 <style>
 :root{--ink:#1E1B4B;--muted:#5B5F7A;--bg:#F6F4FF;--line:#E4E1F5;--pink:#EC4899;--purple:#7C3AED;--blue:#2563EB;--teal:#0D9488;--green:#16A34A;--amber:#F59E0B;--red:#DC2626;--orange:#F97316;--g1:linear-gradient(90deg,#7C3AED,#EC4899,#F97316)}
@@ -412,7 +413,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7wsNVH0hQiKUX8nZRctrXEywkCIWkwmDncHzMwlDL2jQd27oHrsp60pUtKzPjgVpg/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzS02DLc8Bg8CdWg0MR2kr8MUvYlDm5tWL78Rs5AWvB59w_G_zROBb76Q8QRzllDE7r/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
