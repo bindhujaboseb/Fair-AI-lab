@@ -141,6 +141,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 .gres div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-weight:700}
 .gchip{border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#fff;font-family:inherit;font-size:15px;text-align:left;color:var(--ink)}
 .gchip.sel{border-color:var(--purple);background:#EDE9FE;font-weight:800}.gchip:disabled{cursor:default}
+.lineup{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px}
+.lineup div{min-height:92px;border:2px dashed #C4B5FD;border-radius:12px;background:#fff;text-align:center;padding:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.lineup div b{display:block;font-size:30px}.lineup div.fill{border-style:solid;border-color:var(--purple);color:var(--ink)}
+.sortcards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.sortcards button{border:2px solid var(--line);border-radius:12px;background:#fff;padding:8px 4px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink)}
+.sortcards button b{display:block;font-size:30px}.sortcards button:disabled{opacity:.25;cursor:default}
+@media(max-width:720px){.lineup,.sortcards{grid-template-columns:repeat(3,1fr)}}
 .l5grid{display:grid;grid-template-columns:150px repeat(2,1fr);gap:10px;align-items:stretch}
 .l5grid .hdr{font-weight:800;text-align:center;align-self:center}
 .cell{border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}
@@ -326,8 +333,16 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
     <div class="trays" id="l2trays"></div>
     <div class="row" style="margin-top:12px"><button class="btn pink" id="l2check" disabled>Check my marks</button><span id="l2msg" style="font-weight:600"></span></div>
     <div id="l2res" class="hide" style="margin-top:14px">
-      <div class="grid2"><div class="card" style="background:#FDF2F8;margin:0"><div class="sub" style="margin:0">AI accuracy on new trays</div><div class="big-num">33%</div><div style="font-size:15px">🍔 100% · 🍕 100% · 🥙 0% · 🍛 0% · 🥟 0%<br>The AI only works well for foods with lots of training pictures.</div></div>
-      <div id="l2qs"></div></div>
+      <div class="card" style="background:#FDF2F8;margin:0"><div class="row" style="gap:18px"><div><div class="sub" style="margin:0">AI accuracy on new trays</div><div class="big-num">33%</div></div><div style="font-size:15px">🍔 100% · 🍕 100% · 🥙 0% · 🍛 0% · 🥟 0%<br>The AI only works well for foods with lots of training pictures.</div></div></div>
+      <div class="game" style="margin-top:14px">
+        <h3>🎯 Activity 2 · Confidence Line-up</h3>
+        <p class="sub" style="margin:0 0 8px">Click the trays in order – from the one the AI was <b>MOST sure</b> about to the one it was <b>LEAST sure</b> about.</p>
+        <div class="lineup" id="l2line"></div>
+        <div class="sortcards" id="l2cards"></div>
+        <div class="row" style="margin-top:10px"><button class="btn sm ghost" id="l2undo">↩ Undo</button><button class="btn sm ghost" id="l2reset">Reset</button><button class="btn sm pink" id="l2sortchk" disabled>Check my line-up</button></div>
+        <div id="l2sortfb"></div>
+      </div>
+      <div id="l2qs" class="hide" style="margin-top:6px"></div>
     </div>
   </div>
 
@@ -460,14 +475,14 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwlHhi_y1f1qfblTRdKdg1rcTkaGJgpKcXcmvkp-iyobg4qQ5WGm2S6DNfcMMjFiY-x/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyaAbPCqhghg7ItYhX5zeW182vdNWYSRe7oy1IDqZIqPQyZj52e3B7p1mb16BoFgOMQ/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51] };   // l5g = groups the old gate treated unfairly (bit mask)
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456] };   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -516,7 +531,8 @@ function applyEvent(d, e, p) {
       d.l2right = right;
       if (!d.l2c && (right === 6 || a.l2 >= 2)) d.l2c = right * 2;
       break;
-    case 'l2q': if (!d.l2c) break; if (q === 1 && !qDone(d, 'l2q', 1)) break; qa(d, 'l2q', q, c, 9, 5); break;
+    case 'l2s': if (!d.l2c) break; qa(d, 'l2s', 0, c, 6, 3); break;
+    case 'l2q': if (!qDone(d, 'l2s', 1)) break; if (q === 1 && !qDone(d, 'l2q', 1)) break; qa(d, 'l2q', q, c, 6, 3); break;
     case 'l3':
       if (!qDone(d, 'l2q', 2)) break;
       add = cleanAdd(p.add, TRAIN, L3_BUDGET); if (!add) break;
@@ -544,7 +560,7 @@ function applyEvent(d, e, p) {
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
   var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
-  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
+  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
@@ -782,7 +798,7 @@ function renderQuiz(box, QS, ev, onDone){
 
 /* ---------- levels ---------- */
 function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && !!d.l1q) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
+function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2s', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
@@ -892,8 +908,42 @@ $('l2check').onclick = () => {
 function l2results(){
   $('l2check').disabled = true; $('l2msg').textContent = `✅ Marks checked: ${S.d.l2right}/6`;
   $('l2res').classList.remove('hide');
-  qSeries('l2qs', L2_QS, 'l2q', 'QUESTION', () => { if (!$('l2qs').querySelector(':scope > .btn')) nextBtn('l2qs', 'Go to Level 3 ➜', 3); });
+  l2sortInit();
 }
+/* L2 activity 2: Confidence Line-up */
+const L2_SHUF = [3, 0, 5, 2, 4, 1];
+let l2order = [], l2sortBuilt = false;
+const trayCard = i => { const t = L2_TRAYS[i], f = FOODS.find(x => x.k === t[0]); return `<b>${f.e}</b>Tray ${i + 1}<br>AI: ${t[1]} · ${t[2]}%`; };
+function l2sortInit(){
+  if (!l2sortBuilt) { l2sortBuilt = true;
+    $('l2cards').innerHTML = L2_SHUF.map(i => `<button data-i="${i}">${trayCard(i)}</button>`).join('');
+    $('l2cards').querySelectorAll('button').forEach(b => b.onclick = () => { if (l2order.length < 6) { l2order.push(+b.dataset.i); l2paint(); } });
+  }
+  if (qDone(S.d, 'l2s', 1)) l2order = [0, 1, 2, 3, 4, 5];
+  l2paint();
+}
+function l2paint(){
+  const done = qDone(S.d, 'l2s', 1);
+  $('l2line').innerHTML = [0,1,2,3,4,5].map(k => { const i = l2order[k];
+    return i == null ? `<div>${k === 0 ? 'MOST sure' : k === 5 ? 'LEAST sure' : '#' + (k + 1)}</div>`
+      : `<div class="fill">${trayCard(i)}${done ? `<br><span style="color:#7C3AED">📸 ${TRAIN[L2_TRAYS[i][0]]} training photo${TRAIN[L2_TRAYS[i][0]] > 1 ? 's' : ''}</span>` : ''}</div>`; }).join('');
+  $('l2cards').querySelectorAll('button').forEach(b => b.disabled = done || l2order.includes(+b.dataset.i));
+  $('l2sortchk').disabled = done || l2order.length < 6;
+  ['l2undo','l2reset','l2sortchk'].forEach(id => $(id).classList.toggle('hide', done));
+  $('l2cards').classList.toggle('hide', done);
+  if (done) {
+    $('l2sortfb').innerHTML = '<div class="fb ok">🎉 Correct line-up! <b>See the pattern?</b> The foods with the <b>fewest training photos</b> got the <b>lowest confidence</b> – that is bias in the data.</div>';
+    $('l2qs').classList.remove('hide');
+    qSeries('l2qs', L2_QS, 'l2q', 'QUESTION', () => { if (!$('l2qs').querySelector(':scope > .btn')) nextBtn('l2qs', 'Go to Level 3 ➜', 3); });
+  } else $('l2qs').classList.add('hide');
+}
+$('l2undo').onclick = () => { l2order.pop(); l2paint(); };
+$('l2reset').onclick = () => { l2order = []; $('l2sortfb').innerHTML = ''; l2paint(); };
+$('l2sortchk').onclick = () => {
+  act('l2s', {choice: +l2order.map(i => i + 1).join('')});
+  if (qDone(S.d, 'l2s', 1)) { l2order = [0, 1, 2, 3, 4, 5]; l2paint(); }
+  else { $('l2sortfb').innerHTML = '<div class="fb no">Not quite – look carefully at the % numbers. The highest % goes first. Try again!</div>'; l2order = []; l2paint(); }
+};
 /* L3 */
 let l3built = false;
 const sumAdd = o => Object.values(o).reduce((s, v) => s + (+v || 0), 0);
