@@ -47,6 +47,8 @@ label.f{display:block;font-size:14px;color:var(--muted);margin:0 0 4px;font-weig
 input[type=text],input[type=password],input[type=number],select,textarea{width:100%;padding:11px 12px;border:2px solid var(--line);border-radius:11px;font-size:17px;font-family:inherit;background:#fff;color:var(--ink)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
 .hide{display:none!important}
+.pinbox{-webkit-text-security:disc;text-security:disc;letter-spacing:3px}
+body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-select:text;user-select:text}
 .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
 /* LO / SC card */
 .goal{background:#fff;border-radius:18px;padding:12px 16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(30,27,75,.06);border-left:6px solid var(--purple)}
@@ -121,6 +123,24 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
 .prog{height:10px;border-radius:999px;background:#EDE9FE;overflow:hidden}.prog div{height:100%;width:0;background:var(--purple)}
 .big-num{font-size:44px;font-weight:900}
 .hint{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px 12px;font-size:15px;margin-top:8px}
+.topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#F0FDF4;border:2px solid #BBF7D0;border-radius:12px;padding:8px 12px;margin-bottom:12px}
+.game{border:2px dashed var(--purple);border-radius:18px;padding:14px;background:#FAF5FF}
+.lane{position:relative;height:210px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:28px;transition:background .4s}
+.lane.day{background:linear-gradient(180deg,#BAE6FD,#FEF9C3)}.lane.night{background:linear-gradient(180deg,#0F172A,#312E81);color:#fff}
+.trav{font-size:84px;text-align:center;min-width:170px;line-height:1.05}.trav small{display:block;font-size:15px;font-weight:800}
+.gate{font-size:100px}
+.verdict{min-width:210px;text-align:center;font-size:24px;font-weight:900;padding:10px;border-radius:14px;background:rgba(255,255,255,.75);color:var(--ink)}
+.verdict.ok{background:#DCFCE7;color:#166534}.verdict.no{background:#FEE2E2;color:#991B1B}
+.walk{animation:walk .5s ease-out}@keyframes walk{from{transform:translateX(-170px);opacity:0}to{transform:none;opacity:1}}
+.flash{position:absolute;top:12px;right:14px;font-weight:900;font-size:20px;padding:6px 12px;border-radius:10px;background:#fff}
+.gdots{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}.gdots span{width:18px;height:18px;border-radius:50%;background:#E5E7EB}
+.gdots .y{background:#16A34A}.gdots .n{background:#DC2626}.gdots .m{background:#F59E0B}
+.hitbtn{background:#DC2626;font-size:21px;padding:13px 26px}
+.gres,.gchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:720px){.gres,.gchips{grid-template-columns:1fr 1fr}}
+.gres div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-weight:700}
+.gchip{border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#fff;font-family:inherit;font-size:15px;text-align:left;color:var(--ink)}
+.gchip.sel{border-color:var(--purple);background:#EDE9FE;font-weight:800}.gchip:disabled{cursor:default}
 .l5grid{display:grid;grid-template-columns:150px repeat(2,1fr);gap:10px;align-items:stretch}
 .l5grid .hdr{font-weight:800;text-align:center;align-self:center}
 .cell{border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}
@@ -240,7 +260,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
     <h2>✅ Starter complete! <span id="starterScore" class="tag" style="background:#DCFCE7;color:#166534"></span></h2>
     <p class="sub">Read today’s learning objective and success criteria above while your teacher explains them. Your ✅ ticks will appear as you achieve each one.</p>
     <div class="wait"><div class="dot"></div><div><b>Waiting for your teacher to start “Explore about Bias”…</b><br><span class="sub">Your screen will open by itself.</span></div></div>
-    <div class="row" style="margin-top:12px"><input type="password" id="gpin" maxlength="8" placeholder="Teacher PIN" style="max-width:180px" autocomplete="off"><button class="btn sm" id="btnGate">Continue</button><span id="gpinMsg" style="color:var(--red);font-weight:600"></span></div>
+    <div class="row" style="margin-top:12px"><input class="pinbox" type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly id="gpin" maxlength="8" placeholder="Teacher PIN" style="max-width:180px"><button class="btn sm" id="btnGate">Continue</button><span id="gpinMsg" style="color:var(--red);font-weight:600"></span></div>
   </div>
 </section>
 
@@ -307,7 +327,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
     <div class="row" style="margin-top:12px"><button class="btn pink" id="l2check" disabled>Check my marks</button><span id="l2msg" style="font-weight:600"></span></div>
     <div id="l2res" class="hide" style="margin-top:14px">
       <div class="grid2"><div class="card" style="background:#FDF2F8;margin:0"><div class="sub" style="margin:0">AI accuracy on new trays</div><div class="big-num">33%</div><div style="font-size:15px">🍔 100% · 🍕 100% · 🥙 0% · 🍛 0% · 🥟 0%<br>The AI only works well for foods with lots of training pictures.</div></div>
-      <div class="qbox" style="margin:0"><div class="qnum">TASK</div><div class="qtext">Why did the AI make these mistakes?</div><div id="l2q"></div></div></div>
+      <div id="l2qs"></div></div>
     </div>
   </div>
 
@@ -325,28 +345,55 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
       <div style="margin-top:12px"><b>⚖️ Fairness score</b> (accuracy of the weakest food): <b id="l3fair">0%</b><div class="meter"><div id="l3meter" style="width:0"></div></div></div>
       <div id="l3msg" class="fb"></div>
     </div>
+    <div id="l3qs" class="hide" style="margin-top:6px"></div>
     <div class="row hide nextrow" id="l3next" style="margin-top:12px"></div>
   </div>
 
   <div id="L4" class="card hide">
     <div class="lvhead" style="background:linear-gradient(90deg,#F59E0B,#EF4444)"><h2 style="margin:0">Level 4 · Fairness Judge ⚖️ <span style="font-size:15px">(optional)</span></h2>
       <div>AI systems in the UAE. Choose the best way to make each one fair.</div></div>
+    <div class="topbar" id="l4top"></div>
     <div id="l4q"></div>
     <div class="row hide nextrow" id="l4next" style="margin-top:12px"></div>
   </div>
 
   <div id="L5" class="card hide">
     <div class="lvhead" style="background:linear-gradient(90deg,#1E1B4B,#7C3AED)"><h2 style="margin:0">Level 5 · Smart Gate Challenge ⭐</h2>
-      <div>A UAE airport Smart Gate learns to recognise travellers. Make it fair for <b>every age group, by day and by night</b>. You have <b>36 new photos</b>. Every group must reach <b>85%</b>.</div></div>
-    <div class="row" style="justify-content:space-between;margin-bottom:8px"><b>📸 Training photos for each group</b><span class="tag" style="background:#EEF2FF;color:var(--blue)">Photos left: <span id="l5left">36</span></span></div>
-    <div class="l5grid" id="l5grid"></div>
-    <div class="row" style="margin-top:12px"><button class="btn" id="l5train">🔄 Retrain Smart Gate</button></div>
-    <div class="prog hide" id="l5prog" style="margin-top:10px"><div></div></div>
-    <div id="l5res" class="hide" style="margin-top:12px">
-      <b>⚖️ Fairness score</b> (weakest group): <b id="l5fair">0%</b><div class="meter"><div id="l5meter" style="width:0"></div></div>
-      <div id="l5msg" class="fb"></div>
+      <div>A UAE airport Smart Gate recognises travellers. <b>Part A:</b> play Gate Run and catch the bias. <b>Part B:</b> fix the training data so every group reaches <b>85%</b>.</div></div>
+    <div class="topbar" id="l5top"></div>
+
+    <div class="game">
+      <h3>🎮 Part A · Gate Run – catch the bias!</h3>
+      <p class="sub" style="margin:0 0 10px">12 travellers walk through the gate. It was trained with the <b>old, unbalanced</b> photos. When the gate wrongly says <b>“❌ Not recognised”</b>, press <b>🚨 UNFAIR!</b> (or the space bar) before the next traveller arrives.</p>
+      <div class="lane day" id="lane"><div class="trav" id="trav">🛂</div><div class="gate">🚪</div><div class="verdict" id="verdict">Ready</div><div class="flash hide" id="gFlash"></div></div>
+      <div class="gdots" id="gDots"></div>
+      <div class="row"><button class="btn" id="gStart">▶ Start Gate Run</button><button class="btn hitbtn" id="gHit" disabled>🚨 UNFAIR!</button><b id="gScore"></b></div>
+      <div id="gSum" class="hide" style="margin-top:14px">
+        <h3>📋 Gate results by group</h3>
+        <div class="gres" id="gRes"></div>
+        <div class="qbox"><div class="qnum">GATE QUESTION</div><div class="qtext">Tap <u>all</u> the groups the Smart Gate treated unfairly, then press Check.</div>
+          <div class="gchips" id="gChips"></div>
+          <div class="row" style="margin-top:10px"><button class="btn" id="gCheck">Check</button></div><div id="gFb"></div></div>
+      </div>
     </div>
-    <div class="row hide nextrow" id="l5next" style="margin-top:12px"></div>
+
+    <div id="l5fix" class="hide" style="margin-top:16px">
+      <h3>🛠️ Part B · Fix the training data</h3>
+      <div class="row" style="justify-content:space-between;margin-bottom:8px"><b>📸 Training photos for each group – you have 36 new photos</b><span class="tag" style="background:#EEF2FF;color:var(--blue)">Photos left: <span id="l5left">36</span></span></div>
+      <div class="l5grid" id="l5grid"></div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="l5train">🔄 Retrain Smart Gate</button></div>
+      <div class="prog hide" id="l5prog" style="margin-top:10px"><div></div></div>
+      <div id="l5res" class="hide" style="margin-top:12px">
+        <b>⚖️ Fairness score</b> (weakest group): <b id="l5fair">0%</b><div class="meter"><div id="l5meter" style="width:0"></div></div>
+        <div id="l5msg" class="fb"></div>
+        <div id="l5again" class="hide" style="margin-top:12px">
+          <button class="btn teal" id="g2Start">🎮 Run the FIXED gate</button>
+          <div class="lane day" id="lane2" style="margin-top:10px"><div class="trav" id="trav2">🛂</div><div class="gate">🚪</div><div class="verdict" id="verdict2">Ready</div></div>
+        </div>
+      </div>
+      <div id="l5qs" class="hide" style="margin-top:6px"></div>
+    </div>
+    <div class="row nextrow" id="l5next" style="margin-top:12px"></div>
   </div>
 </section>
 
@@ -357,7 +404,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
     <p class="sub">Great work! Show your teacher your <b>Level 3 chart</b> and explain how you made the AI fair.</p>
     <div class="row"><span class="tag" style="background:#EDE9FE;color:var(--purple)">Main activity score: <span id="chkScore"></span>/100</span><span class="tag" style="background:#DCFCE7;color:#166534">Fairness: <span id="chkFair"></span>%</span></div>
     <div class="wait"><div class="dot"></div><div><b>Waiting for your teacher's approval…</b></div></div>
-    <div class="row" style="margin-top:12px"><input type="password" id="pin" maxlength="8" placeholder="Teacher PIN" style="max-width:180px" autocomplete="off"><button class="btn sm" id="btnApprove">Approve</button><span id="pinMsg" style="color:var(--red);font-weight:600"></span></div>
+    <div class="row" style="margin-top:12px"><input class="pinbox" type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly id="pin" maxlength="8" placeholder="Teacher PIN" style="max-width:180px"><button class="btn sm" id="btnApprove">Approve</button><span id="pinMsg" style="color:var(--red);font-weight:600"></span></div>
     <div class="row" style="margin-top:12px"><button class="btn sm ghost" id="btnBackLevels">⬅ Back to the levels</button></div>
   </div>
 </section>
@@ -413,14 +460,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw57AF48yaLgh4ZRnyE8PZO_qkvB55QPFaC36U-_ntJGil9OLVJOqir-BV8gnuhrvxH/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwlHhi_y1f1qfblTRdKdg1rcTkaGJgpKcXcmvkp-iyobg4qQ5WGm2S6DNfcMMjFiY-x/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: 1, l4: [1, 1, 0] };
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51] };   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -438,6 +485,15 @@ function cleanAdd(add, base, budget) {
   }
   return sum <= budget ? o : null;
 }
+function qa(d, ev, q, c, full, part) {
+  var keys = KEY[ev]; if (!(q >= 0 && q < keys.length)) return;
+  d.qa = d.qa || {}; var r = d.qa[ev + q] || (d.qa[ev + q] = { n: 0 });
+  if (r.pts != null) return;
+  r.n++; if (c === keys[q]) r.pts = r.n === 1 ? full : part;
+}
+function qDone(d, ev, n) { for (var i = 0; i < n; i++) if (!(d.qa && d.qa[ev + i] && d.qa[ev + i].pts != null)) return false; return true; }
+function qSum(d, ev, n) { var t = 0; for (var i = 0; i < n; i++) if (d.qa && d.qa[ev + i] && d.qa[ev + i].pts) t += d.qa[ev + i].pts; return t; }
+function l4All(d) { for (var i = 0; i < KEY.l4.length; i++) if (!d.l4 || d.l4[i] == null) return false; return true; }
 function newData() { return { s: [], p: [], att: {}, l4: [], hots: '' }; }
 function applyEvent(d, e, p) {
   d.att = d.att || {}; d.s = d.s || []; d.p = d.p || []; d.l4 = d.l4 || [];
@@ -460,24 +516,27 @@ function applyEvent(d, e, p) {
       d.l2right = right;
       if (!d.l2c && (right === 6 || a.l2 >= 2)) d.l2c = right * 2;
       break;
-    case 'l2q': if (!d.l2c) break; a.l2q = (a.l2q || 0) + 1; if (!d.l2q && c === KEY.l2q) d.l2q = a.l2q === 1 ? 18 : 9; break;
+    case 'l2q': if (!d.l2c) break; if (q === 1 && !qDone(d, 'l2q', 1)) break; qa(d, 'l2q', q, c, 9, 5); break;
     case 'l3':
-      if (!d.l2q) break;
+      if (!qDone(d, 'l2q', 2)) break;
       add = cleanAdd(p.add, TRAIN, L3_BUDGET); if (!add) break;
       a.l3 = (a.l3 || 0) + 1; f = 100;
       for (k in TRAIN) f = Math.min(f, acc3(TRAIN[k] + add[k]));
       d.fair = f;
-      if (f >= L3_GOAL && !d.l3) d.l3 = a.l3 <= 3 ? 40 : 30;
+      if (f >= L3_GOAL && !d.l3) d.l3 = a.l3 <= 3 ? 30 : 22;
       break;
-    case 'l4': if (!d.l3) break; if (q >= 0 && q < 3 && d.l4[q] == null) d.l4[q] = c === KEY.l4[q] ? 1 : 0; break;
+    case 'l3q': if (!d.l3) break; if (q === 1 && !qDone(d, 'l3q', 1)) break; qa(d, 'l3q', q, c, 5, 3); break;
+    case 'l4': if (!qDone(d, 'l3q', 2)) break; if (q >= 0 && q < KEY.l4.length && d.l4[q] == null) d.l4[q] = c === KEY.l4[q] ? 1 : 0; break;
     case 'l5':
-      if (!(d.l4[0] != null && d.l4[1] != null && d.l4[2] != null)) break;
+      if (!l4All(d) || !qDone(d, 'l5g', 1)) break;
       add = cleanAdd(p.add, L5_BASE, L5_BUDGET); if (!add) break;
       a.l5 = (a.l5 || 0) + 1; f = 100;
       for (k in L5_BASE) f = Math.min(f, acc5(L5_BASE[k] + add[k]));
       d.fair5 = f;
       if (f >= L5_GOAL && !d.l5) d.l5 = a.l5 <= 3 ? 30 : 20;
       break;
+    case 'l5g': if (!l4All(d)) break; qa(d, 'l5g', 0, c, 10, 5); break;
+    case 'l5q': if (!d.l5) break; if (q > 0 && !qDone(d, 'l5q', q)) break; qa(d, 'l5q', q, c, 10, 5); break;
     case 'hots': d.hots = String(p.text || '').slice(0, 400); break;
   }
   return d;
@@ -485,7 +544,7 @@ function applyEvent(d, e, p) {
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
   var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
-  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + (d.l2q || 0), l3 = d.l3 || 0, l5 = d.l5 || 0;
+  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
@@ -517,7 +576,28 @@ const L4_Q = [
   {q:'🛂 An airport Smart Gate in the UAE recognises young travellers quickly but often fails for elderly passengers. What is the most likely cause?',
    a:['Elderly passengers walk too slowly','Few photos of older people were in the training data','The airport is too busy','The gate camera is too small']},
   {q:'💼 A company in Dubai uses a job-shortlisting AI that learned from 10 years of past hiring, when mostly men were hired. What might happen?',
-   a:['It may unfairly prefer men – so use balanced data and human review','It will choose everyone equally','It will stop working','It will hire only robots']}];
+   a:['It may unfairly prefer men – so use balanced data and human review','It will choose everyone equally','It will stop working','It will hire only robots']},
+  {q:'🏥 A skin-check app used in UAE clinics was trained mostly with photos of light skin. What is the best fix?',
+   a:['Use it only for some patients','Add photos of all skin tones and test it on every group','Make the photos brighter','Use a bigger screen']},
+  {q:'🚗 A self-driving car’s AI was tested only on sunny days in Dubai. What should the engineers do before using it?',
+   a:['Nothing – it is sunny most of the time','Train and test it at night, in sandstorms and in rain too','Paint the car white','Drive faster']}];
+const L2_QS = [
+  {q:'Why did the AI make these mistakes?', a:['The camera was broken','Some foods had very few training pictures','The AI was lazy','There were too many pictures in total'],
+   ok:'Yes! Too few examples of some foods = biased data = unfair results.', no:'Think about the Level 1 chart. Which foods had only a few pictures?'},
+  {q:'Tray 5 (samosa): the AI said “Pizza” and was only 41% sure. What does a low confidence % tell us?', a:['The AI is very sure','The AI is unsure because it saw very few samosas','The tray is empty','The camera is too close'],
+   ok:'Correct – low confidence is a warning sign that the AI did not learn this group well.', no:'Think: how many samosa pictures did the AI see in training?'}];
+const L3_QS = [
+  {q:'Why does adding more burger photos NOT make the AI fairer?', a:['Burgers are not healthy','Burger already had many photos – fairness depends on the weakest food','The AI does not like burgers','More photos always make the AI slower'],
+   ok:'Exactly – fairness is decided by the group the AI recognises worst.', no:'Look at your chart: which food decides the fairness score?'},
+  {q:'The SmartCanteen AI is now fair in this test. What should the canteen do NEXT?', a:['Stop collecting photos forever','Keep testing it on new trays of every food, including new menu items','Remove the camera','Only test it on burgers'],
+   ok:'Yes – fair AI needs regular testing on every group.', no:'Remember the 3 steps: check the data, balance every group, test on everyone.'}];
+const L5_QS = [
+  {q:'Which group needed the MOST new photos to become fair?', a:['🧑 Adults – Day','🧒 Children – Day','👵 Seniors – Night','🧑 Adults – Night'],
+   ok:'Right – Seniors at night had 0 photos, so the Smart Gate could not recognise them at all.', no:'Look at the starting numbers. Which group had the fewest photos?'},
+  {q:'Why is the fairness score based on the WEAKEST group, not the average?', a:['Because averages are hard to calculate','Because a high average can hide a group the AI fails on','Because the weakest group is always children','It does not matter'],
+   ok:'Exactly – an AI can look good on average and still be unfair to one group.', no:'Think: could the average be high while one group is still failing?'},
+  {q:'Before the Smart Gate is used at the airport, what is the BEST next step?', a:['Use it straight away','Test it with real travellers of every age, by day and by night, and keep checking it','Only let adults use it','Turn off the night camera'],
+   ok:'Perfect – real-world testing on everyone keeps the AI fair.', no:'Remember: test on everyone, in every condition.'}];
 const L2_TRAYS = [['burger','Burger',96],['pizza','Pizza',91],['shawarma','Burger',54],['biryani','Pizza',48],['samosa','Pizza',41],['samosa','Burger',39]];
 const L5_ROWS = [['c','🧒 Children'],['a','🧑 Adults'],['s','👵 Seniors']], L5_COLS = [['d','☀️ Day'],['n','🌙 Night']];
 const SCS = [
@@ -533,15 +613,43 @@ const TIMES = {starter:[5,'STARTER'],explore:[3,'EXPLORE'],main:[10,'LEVELS'],pl
 const SALT = 'fair-ai-lab-g8';
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 function fresh(){ return {phase:'login',view:'login',name:'',cls:'',div:'',id:'',d:newData(),level:1,tEnd:0,tPhase:'',srv:null,
-  l1vals:{},l2marks:{},l2scan:{},l3add:{},l5add:{},l4try:[],scSeen:[]}; }
+  l1vals:{},l2marks:{},l2scan:{},l3add:{},l5add:{},l4try:[],scSeen:[],l5played:0}; }
 function save(){ try{ const j = JSON.stringify(S); localStorage.setItem('fairAI2', JSON.stringify({j, h: hash(SALT + j)})); }catch(e){} }
 function load(){ try{ const o = JSON.parse(localStorage.getItem('fairAI2')); if (o && o.h === hash(SALT + o.j)) return JSON.parse(o.j); }catch(e){} return null; }
 let S = load() || fresh();
 
 const toast = t => { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2800); };
 const sc = () => scoreOf(S.d);
-const pts = () => (S.srv != null ? S.srv : sc().points);
-const l4done = () => S.d.l4 && S.d.l4[0] != null && S.d.l4[1] != null && S.d.l4[2] != null;
+const pts = () => (SHEET_URL ? (S.srv != null ? S.srv : '…') : sc().points);
+const l4done = () => l4All(S.d);
+const qAnswered = (ev, i) => !!(S.d.qa && S.d.qa[ev + i] && S.d.qa[ev + i].pts != null);
+
+/* ---------- protection: edits made with Inspect are undone straight away ---------- */
+const GUARD = new Map();
+function guard(el, html){ el.innerHTML = html; GUARD.set(el, el.innerHTML); }
+function checkGuards(){
+  for (const [el, h] of GUARD) {
+    if (!document.body.contains(el)) { GUARD.clear(); setTimeout(() => location.reload(), 50); return; }
+    if (el.innerHTML !== h) el.innerHTML = h;
+  }
+  document.querySelectorAll('#goal, #cert, header, .levels').forEach(x => { if (x.hidden || x.style.display === 'none') { x.hidden = false; x.style.display = ''; } });
+}
+new MutationObserver(checkGuards).observe(document.documentElement, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['style', 'hidden']});
+setInterval(checkGuards, 700);
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase();
+  if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c','k'].includes(k)) || ((e.ctrlKey || e.metaKey) && ['u','s'].includes(k))) {
+    e.preventDefault(); e.stopPropagation(); toast('🔒 This is not allowed during the lesson.');
+  }
+}, true);
+/* PIN boxes: never saved or filled in by the browser */
+document.querySelectorAll('.pinbox').forEach(el => {
+  el.name = 'p' + Math.random().toString(36).slice(2);
+  el.addEventListener('focus', () => el.removeAttribute('readonly'));
+  el.addEventListener('blur', () => el.setAttribute('readonly', ''));
+});
+window.addEventListener('pagehide', () => document.querySelectorAll('.pinbox').forEach(el => el.value = ''));
 
 /* ---------- talking to the Google Sheet ---------- */
 let chain = Promise.resolve();
@@ -602,13 +710,13 @@ function render(){
   $('timer').classList.toggle('hide', !student || !TIMES[S.tPhase] || S.phase === 'done');
   paintWho(); paintGoal(); paintStepper();
   if (v === 'starter') renderQuiz('starterQ', STARTER_Q, 'starter', () => { if (S.phase === 'starter') setPhase('gate'); });
-  if (v === 'gate') $('starterScore').textContent = `${sc().starter}/2 correct`;
+  if (v === 'gate') guard($('starterScore'), `${sc().starter}/2 correct`);
   if (v === 'main') renderMain();
-  if (v === 'check') { $('chkScore').textContent = sc().main; $('chkFair').textContent = sc().fair; }
+  if (v === 'check') { guard($('chkScore'), String(sc().main)); guard($('chkFair'), String(sc().fair)); }
   if (v === 'plenary') renderPlenary();
   if (v === 'done') renderCert();
 }
-function paintWho(){ $('who').innerHTML = `${esc(S.name)} · ${S.cls}-${S.div}<br><b>⭐ ${pts()}</b> pts`; }
+function paintWho(){ guard($('who'), `${esc(S.name)} · ${S.cls}-${S.div}<br><b>⭐ ${pts()}</b> pts`); }
 function paintStepper(){
   if (['login','confirm'].includes(S.view)) { $('stepper').innerHTML = ''; return; }
   const curPill = {gate:'explore', check:'plenary'}[S.view] || S.view;
@@ -627,7 +735,7 @@ function paintStepper(){
 const esc = t => String(t || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- LO / SC card with automatic ticks ---------- */
-function scState(){ const d = S.d; return [!!d.l1q, !!d.l2q, d.p[1] === 1 || (d.l4 || []).filter(x => x === 1).length >= 2, !!d.l3]; }
+function scState(){ const d = S.d; return [!!d.l1q, qDone(d, 'l2q', 2), d.p[1] === 1 || (d.l4 || []).filter(x => x === 1).length >= 2, !!d.l3]; }
 function paintGoal(){
   const st = scState(); let n = 0;
   $('scList').innerHTML = SCS.map(([k, t], i) => {
@@ -673,8 +781,8 @@ function renderQuiz(box, QS, ev, onDone){
 }
 
 /* ---------- levels ---------- */
-function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && !!d.l1q) || (n === 3 && !!d.l2q) || (n === 4 && !!d.l3) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, d.l1q, d.l2q, d.l3, l4done(), d.l5][n]; }
+function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && !!d.l1q) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
+function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
@@ -686,6 +794,10 @@ function renderMain(){
 }
 function goLevel(n){ S.level = n; save(); renderMain(); sendStage(); window.scrollTo(0, 0); }
 function nextBtn(box, label, n){ const b = document.createElement('button'); b.className = 'btn'; b.style.marginTop = '12px'; b.textContent = label; b.onclick = () => goLevel(n); $(box).appendChild(b); }
+function checkBar(id, msg){
+  afterButtons(id); const box = $(id); box.querySelectorAll('.btn').forEach(b => b.classList.add('sm'));
+  const t = document.createElement('span'); t.className = 'sub'; t.style.margin = '0'; t.textContent = msg; box.prepend(t);
+}
 function afterButtons(boxId, extra){
   const box = $(boxId); box.classList.remove('hide'); box.innerHTML = '';
   const add = (cls, txt, fn) => { const b = document.createElement('button'); b.className = 'btn ' + cls; b.textContent = txt; b.onclick = fn; box.appendChild(b); };
@@ -708,6 +820,19 @@ function mcq(box, opts, isRight, answered, ev, payload, okMsg, noMsg, onOk){
     if (isRight(j)) fin();
     else { b.classList.add('no'); b.disabled = true; $(box).querySelector('.fbx').innerHTML = `<div class="fb no">💡 ${noMsg}</div>`; }
   });
+}
+/* a series of questions shown one after another; each needs the right answer before the next appears */
+function qSeries(boxId, QS, ev, label, onAll){
+  const box = $(boxId); box.innerHTML = '';
+  for (let i = 0; i < QS.length; i++) {
+    if (i > 0 && !qAnswered(ev, i - 1)) break;
+    const Q = QS[i], wrap = document.createElement('div');
+    wrap.className = 'qbox'; wrap.innerHTML = `<div class="qnum">${label} ${i + 1} OF ${QS.length}</div><div class="qtext">${Q.q}</div><div id="${boxId}_${i}"></div>`;
+    box.appendChild(wrap);
+    const was = qAnswered(ev, i);
+    mcq(`${boxId}_${i}`, Q.a, j => j === KEY[ev][i], was, ev, {q: i}, Q.ok, Q.no,
+      () => { if (i === QS.length - 1) onAll(); else if (!was) setTimeout(() => qSeries(boxId, QS, ev, label, onAll), 700); });
+  }
 }
 /* L1 */
 let l1built = false;
@@ -767,9 +892,7 @@ $('l2check').onclick = () => {
 function l2results(){
   $('l2check').disabled = true; $('l2msg').textContent = `✅ Marks checked: ${S.d.l2right}/6`;
   $('l2res').classList.remove('hide');
-  mcq('l2q', ['The camera was broken','Some foods had very few training pictures','The AI was lazy','There were too many pictures in total'], j => j === KEY.l2q, !!S.d.l2q, 'l2q', {},
-    'Yes! Too few examples of some foods = biased data = unfair results.', 'Think about the Level 1 chart. Which foods had only a few pictures?',
-    () => { if (!$('l2q').querySelector('.btn')) nextBtn('l2q', 'Go to Level 3 ➜', 3); });
+  qSeries('l2qs', L2_QS, 'l2q', 'QUESTION', () => { if (!$('l2qs').querySelector(':scope > .btn')) nextBtn('l2qs', 'Go to Level 3 ➜', 3); });
 }
 /* L3 */
 let l3built = false;
@@ -806,12 +929,13 @@ function l3show(){
   } else {
     $('l3msg').className = 'fb no'; $('l3msg').innerHTML = `Still unfair to: <b>${FOODS.filter(f => a[f.k] < L3_GOAL).map(f => f.e + ' ' + f.n).join(', ')}</b>. Change your photos and retrain.`;
   }
-  if (S.d.l3) afterButtons('l3next', [['ghost', 'Try Level 4 (optional) ➜', () => goLevel(4)]]); else $('l3next').classList.add('hide');
+  $('l3qs').classList.toggle('hide', !S.d.l3); $('l3next').classList.add('hide');
+  if (S.d.l3) qSeries('l3qs', L3_QS, 'l3q', 'QUESTION', () => afterButtons('l3next', [['ghost', 'Try Level 4 (optional) ➜', () => goLevel(4)]]));
 }
 /* L4 */
 function initL4(){
   S.l4try = S.l4try || [];
-  $('l4q').innerHTML = L4_Q.map((Q, i) => `<div class="qbox" id="l4b${i}"><div class="qnum">CASE ${i + 1} OF 3</div><div class="qtext">${Q.q}</div><div id="l4a${i}"></div></div>`).join('');
+  $('l4q').innerHTML = L4_Q.map((Q, i) => `<div class="qbox" id="l4b${i}"><div class="qnum">CASE ${i + 1} OF ${L4_Q.length}</div><div class="qtext">${Q.q}</div><div id="l4a${i}"></div></div>`).join('');
   L4_Q.forEach((Q, i) => {
     const shown = i === 0 || S.l4try[i - 1];
     $('l4b' + i).classList.toggle('hide', !shown);
@@ -819,10 +943,15 @@ function initL4(){
     mcq('l4a' + i, Q.a, j => j === KEY.l4[i], !!S.l4try[i], 'l4', {q: i}, 'Fair thinking!', 'Think: what was missing from the training data?',
       () => { if (!S.l4try[i]) { S.l4try[i] = 1; save(); setTimeout(initL4, 900); } });
   });
-  if (l4done() && S.l4try[2]) afterButtons('l4next', [['orange', '⭐ Try the Level 5 Challenge ➜', () => goLevel(5)]]); else $('l4next').classList.add('hide');
+  checkBar('l4top', 'Level 4 is optional – you can go to your teacher check at any time.');
+  afterButtons('l4next', l4done() && S.l4try[L4_Q.length - 1] ? [['orange', '⭐ Try the Level 5 Challenge ➜', () => goLevel(5)]] : []);
 }
 /* L5 */
-let l5built = false;
+const GROUPS = {cd:['🧒','Child','☀️ Day'], cn:['🧒','Child','🌙 Night'], ad:['🧑','Adult','☀️ Day'], an:['🧑','Adult','🌙 Night'], sd:['👵','Senior','☀️ Day'], sn:['👵','Senior','🌙 Night']};
+const GBITS = ['cd','cn','ad','an','sd','sn'];
+const RUN = ['ad','cn','sd','an','sn','cd','ad','sn','cn','an','sd','cd'], OLD = [1,0,0,1,0,1,1,0,0,1,1,0];
+const glabel = k => `${GROUPS[k][0]} ${GROUPS[k][1]} · ${GROUPS[k][2]}`;
+let l5built = false, G = null, gSel = 0;
 function initL5(){
   if (!l5built) { l5built = true;
     let h = '<div></div>' + L5_COLS.map(c => `<div class="hdr">${c[1]}</div>`).join('');
@@ -835,9 +964,79 @@ function initL5(){
       if (d < 0 && cur <= 0) return;
       S.l5add[k] = cur + d; save(); l5refresh();
     });
+    $('gChips').innerHTML = GBITS.map((k, i) => `<button class="gchip" data-b="${1 << i}">${glabel(k)}</button>`).join('');
+    $('gChips').querySelectorAll('.gchip').forEach(b => b.onclick = () => { gSel ^= +b.dataset.b; b.classList.toggle('sel'); });
+    $('gDots').innerHTML = RUN.map(() => '<span></span>').join('');
   }
-  l5refresh(); if (S.d.fair5) l5show();
+  checkBar('l5top', 'Level 5 is a challenge – you can go to your teacher check at any time.');
+  afterButtons('l5next');
+  l5refresh(); gameSummary();
+  if (S.d.fair5) l5show();
 }
+/* Part A: Gate Run game */
+function flash(t, c){ const f = $('gFlash'); f.textContent = t; f.style.color = c; f.classList.remove('hide'); clearTimeout(f._t); f._t = setTimeout(() => f.classList.add('hide'), 900); }
+function showTraveller(lane, trav, verd, k){
+  $(lane).className = 'lane ' + (k[1] === 'd' ? 'day' : 'night');
+  $(trav).innerHTML = `<div class="walk">${GROUPS[k][0]}<small>${GROUPS[k][1]} · ${GROUPS[k][2]}</small></div>`;
+  $(verd).className = 'verdict'; $(verd).textContent = 'Scanning…';
+}
+function setVerdict(verd, ok){ $(verd).className = 'verdict ' + (ok ? 'ok' : 'no'); $(verd).textContent = ok ? '✅ Welcome!' : '❌ Not recognised'; }
+function dot(i, cls){ const d = $('gDots').children[i]; if (d) d.className = cls; }
+function finishStep(){
+  if (!G || G.cur < 0) return;
+  const i = G.cur;
+  if (OLD[i]) { if (!G.flag) dot(i, 'y'); }
+  else if (!G.flag) { G.miss++; dot(i, 'm'); }
+  G.ready = false;
+}
+$('gStart').onclick = () => {
+  G = {cur: -1, flag: false, ready: false, hits: 0, fa: 0, miss: 0}; let i = 0;
+  [...$('gDots').children].forEach(d => d.className = '');
+  $('gStart').disabled = true; $('gHit').disabled = false; $('gScore').textContent = '';
+  const step = () => {
+    finishStep();
+    if (i >= RUN.length) { endGame(); return; }
+    const idx = i++; G.cur = idx; G.flag = false; G.ready = false;
+    showTraveller('lane', 'trav', 'verdict', RUN[idx]);
+    setTimeout(() => { if (!G || G.cur !== idx) return; setVerdict('verdict', OLD[idx]); G.ready = true; }, 650);
+    G.t = setTimeout(step, 2300);
+  };
+  step();
+};
+function hit(){
+  if (!G || !G.ready || G.flag) return;
+  G.flag = true;
+  if (!OLD[G.cur]) { G.hits++; dot(G.cur, 'y'); flash('🎯 Bias caught!', '#16A34A'); }
+  else { G.fa++; dot(G.cur, 'n'); flash('Oops – that one was fair', '#DC2626'); }
+}
+$('gHit').onclick = hit;
+document.addEventListener('keydown', e => { if (e.code === 'Space' && S.view === 'main' && S.level === 5 && G && G.ready) { e.preventDefault(); hit(); } });
+function endGame(){
+  $('gStart').disabled = false; $('gStart').textContent = '↻ Play again'; $('gHit').disabled = true;
+  const stars = G.hits === 6 && G.fa === 0 ? '⭐⭐⭐' : G.hits >= 4 ? '⭐⭐' : G.hits >= 1 ? '⭐' : '';
+  $('gScore').textContent = `You caught ${G.hits} of 6 unfair rejections · false alarms: ${G.fa} ${stars}`;
+  $('trav').textContent = '🏁'; $('verdict').className = 'verdict'; $('verdict').textContent = 'Run finished';
+  S.l5played = 1; save(); gameSummary(); G = null;
+}
+function gameSummary(){
+  if (!S.l5played) return;
+  $('gSum').classList.remove('hide');
+  $('gRes').innerHTML = GBITS.map(k => `<div>${glabel(k)}<br>${RUN.map((r, i) => r === k ? (OLD[i] ? '✅' : '❌') : '').join(' ')}</div>`).join('');
+  const done = qDone(S.d, 'l5g', 1);
+  if (done) {
+    $('gChips').querySelectorAll('.gchip').forEach(b => { b.disabled = true; b.classList.toggle('sel', !!(KEY.l5g[0] & +b.dataset.b)); });
+    $('gCheck').classList.add('hide');
+    $('gFb').innerHTML = '<div class="fb ok">🎉 Correct! The gate was unfair to children and seniors – especially at night – because they had too few training photos. Now fix it in Part B.</div>';
+    $('l5fix').classList.remove('hide');
+  }
+}
+$('gCheck').onclick = () => {
+  if (!gSel) { $('gFb').innerHTML = '<div class="fb no">Tap at least one group first.</div>'; return; }
+  act('l5g', {choice: gSel});
+  if (qDone(S.d, 'l5g', 1)) { gameSummary(); $('l5fix').scrollIntoView({behavior: 'smooth', block: 'start'}); }
+  else $('gFb').innerHTML = '<div class="fb no">Not quite. Look at the results: which groups got at least one ❌? Fix your choices and check again.</div>';
+};
+/* Part B: fix the data */
 function l5refresh(){ Object.keys(L5_BASE).forEach(k => $('cn_' + k).textContent = L5_BASE[k] + (S.l5add[k] || 0) + ((S.l5add[k] || 0) ? ` (+${S.l5add[k]})` : '')); $('l5left').textContent = L5_BUDGET - sumAdd(S.l5add); }
 $('l5train').onclick = () => retrain($('l5train'), 'l5prog', () => { act('l5', {add: S.l5add}); l5show(); });
 function l5show(){
@@ -846,10 +1045,22 @@ function l5show(){
     const el = $('ca_' + k); el.classList.remove('hide'); el.textContent = a + '%';
     el.style.background = a >= L5_GOAL ? '#DCFCE7' : a >= 65 ? '#FEF3C7' : '#FEE2E2'; el.style.color = a >= L5_GOAL ? '#166534' : a >= 65 ? '#92400E' : '#991B1B'; });
   $('l5res').classList.remove('hide'); $('l5fair').textContent = fair + '%'; $('l5meter').style.width = fair + '%';
-  if (fair >= L5_GOAL) { $('l5msg').className = 'fb ok'; $('l5msg').innerHTML = '🏆 <b>Challenge complete!</b> The Smart Gate is fair for every age group, by day and by night.'; }
+  if (fair >= L5_GOAL) { $('l5msg').className = 'fb ok'; $('l5msg').innerHTML = '🏆 <b>Challenge complete!</b> The Smart Gate is fair for every age group, by day and by night. Run the fixed gate to see the difference!'; }
   else { $('l5msg').className = 'fb no'; $('l5msg').innerHTML = 'Some groups are still below 85% (red or yellow). Which groups had the fewest photos – and at what time of day?'; }
-  if (S.d.l5) afterButtons('l5next'); else $('l5next').classList.add('hide');
+  $('l5again').classList.toggle('hide', !S.d.l5);
+  $('l5qs').classList.toggle('hide', !S.d.l5);
+  if (S.d.l5) qSeries('l5qs', L5_QS, 'l5q', 'CHALLENGE QUESTION', () => afterButtons('l5next'));
 }
+$('g2Start').onclick = () => {
+  $('g2Start').disabled = true; let i = 0;
+  const step = () => {
+    if (i >= RUN.length) { $('trav2').textContent = '🎉'; $('verdict2').className = 'verdict ok'; $('verdict2').textContent = '12 / 12 welcomed!'; $('g2Start').disabled = false; return; }
+    const k = RUN[i++]; showTraveller('lane2', 'trav2', 'verdict2', k);
+    setTimeout(() => setVerdict('verdict2', acc5(L5_BASE[k] + (S.l5add[k] || 0)) >= L5_GOAL), 350);
+    setTimeout(step, 1000);
+  };
+  step();
+};
 
 /* ---------- plenary ---------- */
 function renderPlenary(){
@@ -869,14 +1080,14 @@ $('btnFinish').onclick = () => setPhase('done');
 /* ---------- certificate ---------- */
 function renderCert(){
   const s = sc();
-  $('certName').textContent = S.name; $('certClass').textContent = `Grade ${S.cls} – ${S.div}`;
-  $('certPts').textContent = pts(); $('certFair').textContent = s.fair + '%'; $('certBand').textContent = s.band;
-  $('certSC').textContent = scState().filter(Boolean).length + ' / 4';
-  $('certStar').classList.toggle('hide', !S.d.l5);
+  guard($('certName'), esc(S.name)); guard($('certClass'), `Grade ${S.cls} – ${S.div}`);
+  guard($('certPts'), String(pts())); guard($('certFair'), s.fair + '%'); guard($('certBand'), s.band);
+  guard($('certSC'), scState().filter(Boolean).length + ' / 4');
+  $('certStar').classList.toggle('hide', !lvDone(5));
   $('certDate').textContent = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
-  $('certMore').innerHTML = !S.d.l3 ? '' : !l4done() ? '🎮 You can still try <b>Level 4</b> – click “Levels” at the top.'
-    : !S.d.l5 ? '⭐ You unlocked the <b>Level 5 Smart Gate Challenge</b> – click “Levels” at the top!' : '🌟 Amazing – you completed every level!';
-  if (SHEET_URL) fetch(`${SHEET_URL}?action=status&id=${encodeURIComponent(S.id)}`).then(r => r.json()).then(d => { if (d && d.points !== undefined && d.points !== '') { S.srv = +d.points; save(); $('certPts').textContent = S.srv; paintWho(); } }).catch(() => {});
+  $('certMore').innerHTML = !lvDone(3) ? '' : !l4done() ? '🎮 You can still try <b>Level 4</b> – click “Levels” at the top.'
+    : !lvDone(5) ? '⭐ You unlocked the <b>Level 5 Smart Gate Challenge</b> – click “Levels” at the top!' : '🌟 Amazing – you completed every level!';
+  if (SHEET_URL) fetch(`${SHEET_URL}?action=status&id=${encodeURIComponent(S.id)}`).then(r => r.json()).then(d => { if (d && d.points !== undefined && d.points !== '') { S.srv = +d.points; save(); guard($('certPts'), String(S.srv)); paintWho(); } }).catch(() => {});
 }
 $('btnPrint').onclick = () => window.print();
 
