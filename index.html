@@ -515,14 +515,14 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbznkL0ILHm0PJwkE-EClLIlT38HtI3r401cYM4YGkD0gbyBjxSlOkJUQeSuzWW8v5rT/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycby07PErPD4fDmyJoifZa1r9niVkBpKcn2WSaSBLl3ZrJtL7_PEFPSB4NX-LoRTIPPZr/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456], l2b: [21], l3d: [172], l1m: [112223] };   // l1m = menu check: 1 enough, 2 too few, 3 missing   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1, 2, 1, 3, 1, 2, 0], l5g: [51], l2s: [123456], l2b: [21], l3d: [172], l1m: [112223] };   // l1m = menu check: 1 enough, 2 too few, 3 missing   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -592,10 +592,10 @@ function applyEvent(d, e, p) {
       a.l5 = (a.l5 || 0) + 1; f = 100;
       for (k in L5_BASE) f = Math.min(f, acc5(L5_BASE[k] + add[k]));
       d.fair5 = f;
-      if (f >= L5_GOAL && !d.l5) d.l5 = a.l5 <= 3 ? 30 : 20;
+      if (f >= L5_GOAL && !d.l5) d.l5 = a.l5 <= 3 ? 20 : 12;
       break;
-    case 'l5g': if (!l4All(d)) break; qa(d, 'l5g', 0, c, 10, 5); break;
-    case 'l5q': if (!d.l5) break; if (q > 0 && !qDone(d, 'l5q', q)) break; qa(d, 'l5q', q, c, 10, 5); break;
+    case 'l5g': if (!l4All(d)) break; qa(d, 'l5g', 0, c, 5, 3); break;
+    case 'l5q': if (!d.l5) break; if (q > 0 && !qDone(d, 'l5q', q)) break; qa(d, 'l5q', q, c, 5, 3); break;
     case 'hots': d.hots = String(p.text || '').slice(0, 400); break;
   }
   return d;
@@ -603,7 +603,7 @@ function applyEvent(d, e, p) {
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
   var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
-  var l1 = (d.l1c || 0) + (d.l1q || 0) + qSum(d, 'l1m', 1), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
+  var l1 = (d.l1c || 0) + (d.l1q || 0) + qSum(d, 'l1m', 1), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 9) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
@@ -656,7 +656,19 @@ const L5_QS = [
   {q:'Why is the fairness score based on the WEAKEST group, not the average?', a:['Because averages are hard to calculate','Because a high average can hide a group the AI fails on','Because the weakest group is always children','It does not matter'],
    ok:'Exactly – an AI can look good on average and still be unfair to one group.', no:'Think: could the average be high while one group is still failing?'},
   {q:'Before the Smart Gate is used at the airport, what is the BEST next step?', a:['Use it straight away','Test it with real travellers of every age, by day and by night, and keep checking it','Only let adults use it','Turn off the night camera'],
-   ok:'Perfect – real-world testing on everyone keeps the AI fair.', no:'Remember: test on everyone, in every condition.'}];
+   ok:'Perfect – real-world testing on everyone keeps the AI fair.', no:'Remember: test on everyone, in every condition.'},
+  {q:'Which of these is a MISSING group (not just a small group)?', a:['Adults by day had 40 photos','Children by day had 8 photos','Seniors at night had 0 photos','Adults at night had 12 photos'],
+   ok:'Yes – 0 photos means the AI has never seen this group at all.', no:'Missing means NO photos. Which group had 0?'},
+  {q:'Why might night-time photos be harder for the Smart Gate to learn?', a:['The gate switches off at night','Night photos are darker, so the AI needs more of them to learn','People walk faster at night','Night photos are always blurry'],
+   ok:'Correct – harder conditions need more (and varied) examples.', no:'Think about the light in night photos.'},
+  {q:'After your fix, the gate reaches 88% for every group. What does this show?', a:['The gate is perfect and never wrong','Only adults matter now','We can delete the old photos','The gate now works fairly for every group we tested'],
+   ok:'Right – fair means it works well for EVERY group, not that it is perfect.', no:'88% is good – but is it perfect? What does “every group” tell you?'},
+  {q:'Many travellers start wearing face masks. What should the Smart Gate team do?', a:['Nothing – the gate is already fair','Collect and test photos of people wearing masks too','Ban masks at the airport','Only use the gate in the daytime'],
+   ok:'Exactly – when new groups appear, collect new data and test again.', no:'Is “people with masks” a group the gate has learned yet?'},
+  {q:'Who should check whether an AI system like the Smart Gate is fair?', a:['Only the computer','Nobody – AI is always fair','People from many different groups, including those it affects','Only the company that made it'],
+   ok:'Yes – different people notice problems that others may miss.', no:'Can an AI be unfair? Who would notice the problems best?'},
+  {q:'The UAE is home to more than 200 nationalities. Which value matters MOST when building AI for everyone here?', a:['Fairness and inclusion for everyone','Making the AI as fast as possible','Using only one language','Using the cheapest camera'],
+   ok:'Perfect – fair and inclusive AI respects every community.', no:'Think about the lesson title: building fair and inclusive AI.'}];
 const L2_TRAYS = [['burger','Burger',96],['pizza','Pizza',91],['shawarma','Burger',54],['biryani','Pizza',48],['samosa','Pizza',41],['samosa','Burger',39]];
 const L5_ROWS = [['c','🧒 Children'],['a','🧑 Adults'],['s','👵 Seniors']], L5_COLS = [['d','☀️ Day'],['n','🌙 Night']];
 const SCS = [
@@ -841,7 +853,7 @@ function renderQuiz(box, QS, ev, onDone){
 
 /* ---------- levels ---------- */
 function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && lvDone(1)) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, !!d.l1q && qDone(d, 'l1m', 1), qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
+function lvDone(n){ const d = S.d; return [0, !!d.l1q && qDone(d, 'l1m', 1), qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 9) && qDone(d, 'l5g', 1)][n]; }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
