@@ -148,6 +148,21 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 .sortcards button{border:2px solid var(--line);border-radius:12px;background:#fff;padding:8px 4px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink)}
 .sortcards button b{display:block;font-size:30px}.sortcards button:disabled{opacity:.25;cursor:default}
 @media(max-width:720px){.lineup,.sortcards{grid-template-columns:repeat(3,1fr)}}
+.bcards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:720px){.bcards{grid-template-columns:1fr}}
+.bcard{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px}
+.bcard .t{font-weight:700;margin-bottom:8px}
+.bcard .ch{display:flex;gap:6px}
+.bcard .ch button{flex:1;padding:7px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:700}
+.bcard .ch button.selB{background:#FEE2E2;border-color:#DC2626}.bcard .ch button.selF{background:#DCFCE7;border-color:#16A34A}
+.bcard.ok{border-color:#16A34A;background:#F0FDF4}
+.bcard .ch button:disabled{cursor:default;opacity:1}.bcard .ch button:disabled:not(.selB):not(.selF){opacity:.4}
+.pcards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:720px){.pcards{grid-template-columns:1fr 1fr}}
+.pcard{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px 8px;text-align:center;cursor:pointer;font-family:inherit;font-size:13.5px;color:var(--ink)}
+.pcard .e{font-size:34px;display:block;line-height:1.2}.pcard b{display:block;font-size:14px}
+.pcard.sel{border-color:var(--teal);background:#CCFBF1;font-weight:700}.pcard:disabled{cursor:default}
+.pcard.dup{opacity:.45}
 .l5grid{display:grid;grid-template-columns:150px repeat(2,1fr);gap:10px;align-items:stretch}
 .l5grid .hdr{font-weight:800;text-align:center;align-self:center}
 .cell{border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}
@@ -342,6 +357,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
         <div class="row" style="margin-top:10px"><button class="btn sm ghost" id="l2undo">↩ Undo</button><button class="btn sm ghost" id="l2reset">Reset</button><button class="btn sm pink" id="l2sortchk" disabled>Check my line-up</button></div>
         <div id="l2sortfb"></div>
       </div>
+      <div class="game hide" id="l2bias" style="margin-top:14px">
+        <h3>⚖️ Activity 3 · Bias or Not?</h3>
+        <p class="sub" style="margin:0 0 8px">The canteen collected more photos in different ways. Is each way <b>biased</b> or <b>fair</b>? Choose for every card, then check.</p>
+        <div class="bcards" id="l2bcards"></div>
+        <div class="row" style="margin-top:10px"><button class="btn sm pink" id="l2bchk" disabled>Check my choices</button></div>
+        <div id="l2bfb"></div>
+      </div>
       <div id="l2qs" class="hide" style="margin-top:6px"></div>
     </div>
   </div>
@@ -359,6 +381,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
       <div class="bars" id="l3bars"></div><div class="barl" id="l3barl"></div>
       <div style="margin-top:12px"><b>⚖️ Fairness score</b> (accuracy of the weakest food): <b id="l3fair">0%</b><div class="meter"><div id="l3meter" style="width:0"></div></div></div>
       <div id="l3msg" class="fb"></div>
+    </div>
+    <div class="game hide" id="l3div" style="margin-top:14px">
+      <h3>📸 Activity 2 · Diverse Data</h3>
+      <p class="sub" style="margin:0 0 8px">More photos are not enough – they must be <b>different</b>. The canteen can keep only <b>4 more samosa photos</b>. Pick the 4 that will teach the AI the <b>most</b>.</p>
+      <div class="pcards" id="l3pcards"></div>
+      <div class="row" style="margin-top:10px"><span class="tag" style="background:#EEF2FF;color:var(--blue)">Chosen: <span id="l3dn">0</span> / 4</span><button class="btn sm teal" id="l3dchk" disabled>Check my photos</button></div>
+      <div id="l3dfb"></div>
     </div>
     <div id="l3qs" class="hide" style="margin-top:6px"></div>
     <div class="row hide nextrow" id="l3next" style="margin-top:12px"></div>
@@ -430,8 +459,8 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
     <h2>🏁 Plenary – Exit Ticket</h2>
     <div id="plenQ"></div>
     <div id="hotsBox" class="hook hide" style="margin-top:14px;border-color:var(--purple)">
-      <div class="qnum">🔥 HOT QUESTION – write your answer</div>
-      <div class="big">Your school wants a face-recognition AI to take attendance. Which students must be in the training photos so it is fair to everyone – and what could happen if one group is missing?</div>
+      <div class="qnum" style="font-size:16px">🔥 HOT QUESTION (Higher-Order Thinking) – write your answer</div>
+      <div class="big">Your school wants a face-recognition AI to take attendance. Which students must be included in the training photos so it is fair to everyone – and what could happen if one group is missing?</div>
       <textarea id="hotsIn" rows="4" maxlength="400" placeholder="Write 2–3 sentences…" style="margin-top:10px"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" id="btnHots">Submit my answer</button><span id="hotsMsg" style="font-weight:600"></span></div>
       <div id="hotsDone" class="hide" style="margin-top:10px"><div class="fb ok">✅ Answer sent! Your teacher will discuss the answers with the class.</div>
@@ -475,14 +504,14 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyaAbPCqhghg7ItYhX5zeW182vdNWYSRe7oy1IDqZIqPQyZj52e3B7p1mb16BoFgOMQ/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhNlRb8ysP8IIJqjsXuxW66LF1DR0FRx0ncZORdkwMVh1lmqh_VQAl-wWvyOO8HpW0/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456] };   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456], l2b: [21], l3d: [172] };   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -532,16 +561,18 @@ function applyEvent(d, e, p) {
       if (!d.l2c && (right === 6 || a.l2 >= 2)) d.l2c = right * 2;
       break;
     case 'l2s': if (!d.l2c) break; qa(d, 'l2s', 0, c, 6, 3); break;
-    case 'l2q': if (!qDone(d, 'l2s', 1)) break; if (q === 1 && !qDone(d, 'l2q', 1)) break; qa(d, 'l2q', q, c, 6, 3); break;
+    case 'l2b': if (!qDone(d, 'l2s', 1)) break; qa(d, 'l2b', 0, c, 4, 2); break;
+    case 'l2q': if (!qDone(d, 'l2b', 1)) break; if (q === 1 && !qDone(d, 'l2q', 1)) break; qa(d, 'l2q', q, c, 4, 2); break;
     case 'l3':
       if (!qDone(d, 'l2q', 2)) break;
       add = cleanAdd(p.add, TRAIN, L3_BUDGET); if (!add) break;
       a.l3 = (a.l3 || 0) + 1; f = 100;
       for (k in TRAIN) f = Math.min(f, acc3(TRAIN[k] + add[k]));
       d.fair = f;
-      if (f >= L3_GOAL && !d.l3) d.l3 = a.l3 <= 3 ? 30 : 22;
+      if (f >= L3_GOAL && !d.l3) d.l3 = a.l3 <= 3 ? 26 : 20;
       break;
-    case 'l3q': if (!d.l3) break; if (q === 1 && !qDone(d, 'l3q', 1)) break; qa(d, 'l3q', q, c, 5, 3); break;
+    case 'l3d': if (!d.l3) break; qa(d, 'l3d', 0, c, 6, 3); break;
+    case 'l3q': if (!qDone(d, 'l3d', 1)) break; if (q === 1 && !qDone(d, 'l3q', 1)) break; qa(d, 'l3q', q, c, 4, 2); break;
     case 'l4': if (!qDone(d, 'l3q', 2)) break; if (q >= 0 && q < KEY.l4.length && d.l4[q] == null) d.l4[q] = c === KEY.l4[q] ? 1 : 0; break;
     case 'l5':
       if (!l4All(d) || !qDone(d, 'l5g', 1)) break;
@@ -560,7 +591,7 @@ function applyEvent(d, e, p) {
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
   var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
-  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
+  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
@@ -798,7 +829,7 @@ function renderQuiz(box, QS, ev, onDone){
 
 /* ---------- levels ---------- */
 function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && !!d.l1q) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2s', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
+function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
@@ -933,9 +964,8 @@ function l2paint(){
   $('l2cards').classList.toggle('hide', done);
   if (done) {
     $('l2sortfb').innerHTML = '<div class="fb ok">🎉 Correct line-up! <b>See the pattern?</b> The foods with the <b>fewest training photos</b> got the <b>lowest confidence</b> – that is bias in the data.</div>';
-    $('l2qs').classList.remove('hide');
-    qSeries('l2qs', L2_QS, 'l2q', 'QUESTION', () => { if (!$('l2qs').querySelector(':scope > .btn')) nextBtn('l2qs', 'Go to Level 3 ➜', 3); });
-  } else $('l2qs').classList.add('hide');
+    l2biasInit();
+  } else { $('l2bias').classList.add('hide'); $('l2qs').classList.add('hide'); }
 }
 $('l2undo').onclick = () => { l2order.pop(); l2paint(); };
 $('l2reset').onclick = () => { l2order = []; $('l2sortfb').innerHTML = ''; l2paint(); };
@@ -943,6 +973,88 @@ $('l2sortchk').onclick = () => {
   act('l2s', {choice: +l2order.map(i => i + 1).join('')});
   if (qDone(S.d, 'l2s', 1)) { l2order = [0, 1, 2, 3, 4, 5]; l2paint(); }
   else { $('l2sortfb').innerHTML = '<div class="fb no">Not quite – look carefully at the % numbers. The highest % goes first. Try again!</div>'; l2order = []; l2paint(); }
+};
+/* L2 activity 3: Bias or Not? */
+const L2_BIAS = [
+  ['🍛', 'All biryani photos come from <b>one</b> restaurant.', 1, 'Only one place – the AI may fail on biryani that looks different.'],
+  ['🍕', 'Pizza photos were taken in <b>5 different</b> canteens.', 0, 'Many places = variety. Good!'],
+  ['🥟', 'All samosa photos were taken <b>at night</b> in dim light.', 1, 'Only one kind of light – the AI may fail in bright daylight.'],
+  ['⚖️', 'Every food has about the <b>same number</b> of photos.', 0, 'Balanced groups = fair.'],
+  ['🥙', 'Shawarma photos show only <b>full, unopened</b> wraps.', 1, 'Half-eaten or opened shawarma will confuse the AI.'],
+  ['📐', 'Photos show each food from the <b>top, side and close-up</b>.', 0, 'Different angles = variety. Good!']];
+let l2bSel = {}, l2bBuilt = false;
+function l2biasInit(){
+  $('l2bias').classList.remove('hide');
+  const done = qDone(S.d, 'l2b', 1);
+  if (!l2bBuilt) { l2bBuilt = true;
+    $('l2bcards').innerHTML = L2_BIAS.map((c, i) => `<div class="bcard" id="bc${i}"><div class="t">${c[0]} ${c[1]}</div>
+      <div class="ch"><button data-i="${i}" data-v="1">⚠️ Biased</button><button data-i="${i}" data-v="0">✅ Fair</button></div><div class="why sub hide" style="margin:6px 0 0;font-size:13.5px">${c[3]}</div></div>`).join('');
+    $('l2bcards').querySelectorAll('.ch button').forEach(b => b.onclick = () => {
+      if (qDone(S.d, 'l2b', 1)) return;
+      l2bSel[b.dataset.i] = +b.dataset.v; l2bPaint();
+    });
+  }
+  if (done) L2_BIAS.forEach((c, i) => l2bSel[i] = c[2]);
+  l2bPaint();
+}
+function l2bPaint(){
+  const done = qDone(S.d, 'l2b', 1);
+  L2_BIAS.forEach((c, i) => {
+    $('bc' + i).querySelectorAll('button').forEach(b => { b.className = l2bSel[i] === +b.dataset.v ? (+b.dataset.v ? 'selB' : 'selF') : ''; b.disabled = done; });
+    $('bc' + i).classList.toggle('ok', done); $('bc' + i).querySelector('.why').classList.toggle('hide', !done);
+  });
+  $('l2bchk').classList.toggle('hide', done);
+  $('l2bchk').disabled = Object.keys(l2bSel).length < L2_BIAS.length;
+  if (done) {
+    $('l2bfb').innerHTML = '<div class="fb ok">🎉 Well done! Bias is not only about <b>how many</b> photos – it is also about <b>variety</b>: different places, light, angles and how the food looks.</div>';
+    $('l2qs').classList.remove('hide');
+    qSeries('l2qs', L2_QS, 'l2q', 'QUESTION', () => { if (!$('l2qs').querySelector(':scope > .btn')) nextBtn('l2qs', 'Go to Level 3 ➜', 3); });
+  } else $('l2qs').classList.add('hide');
+}
+$('l2bchk').onclick = () => {
+  let mask = 0; L2_BIAS.forEach((c, i) => { if (l2bSel[i] === 1) mask |= 1 << i; });
+  act('l2b', {choice: mask});
+  if (qDone(S.d, 'l2b', 1)) l2bPaint();
+  else { const right = L2_BIAS.filter((c, i) => l2bSel[i] === c[2]).length;
+    $('l2bfb').innerHTML = `<div class="fb no">${right} of 6 are correct. Ask yourself: does this way of collecting photos <b>leave out</b> some situations?</div>`; }
+};
+/* L3 activity 2: Diverse Data */
+const L3_PHOTOS = [
+  ['Top view', 'bright light · full plate'], ['Top view', 'bright light · full plate'], ['Side view', 'dim canteen light'], ['Half-eaten', 'on a paper plate'],
+  ['Top view', 'bright light · full plate'], ['Close-up', 'on a tray with chutney'], ['Top view', 'bright light · full plate'], ['In a lunch box', 'from home']];
+let l3dSel = 0, l3dBuilt = false;
+const bits = m => { let n = 0; while (m) { n += m & 1; m >>= 1; } return n; };
+function l3divInit(){
+  $('l3div').classList.toggle('hide', !S.d.l3);
+  if (!S.d.l3) return;
+  if (!l3dBuilt) { l3dBuilt = true;
+    $('l3pcards').innerHTML = L3_PHOTOS.map((p, i) => `<button class="pcard" data-b="${1 << i}"><span class="e">🥟</span><b>${p[0]}</b>${p[1]}</button>`).join('');
+    $('l3pcards').querySelectorAll('.pcard').forEach(b => b.onclick = () => {
+      if (qDone(S.d, 'l3d', 1)) return;
+      const v = +b.dataset.b;
+      if (!(l3dSel & v) && bits(l3dSel) >= 4) { toast('You can keep only 4 photos – remove one first.'); return; }
+      l3dSel ^= v; l3dPaint();
+    });
+  }
+  if (qDone(S.d, 'l3d', 1)) l3dSel = KEY.l3d[0];
+  l3dPaint();
+}
+function l3dPaint(){
+  const done = qDone(S.d, 'l3d', 1);
+  $('l3pcards').querySelectorAll('.pcard').forEach(b => { b.classList.toggle('sel', !!(l3dSel & +b.dataset.b)); b.disabled = done; b.classList.toggle('dup', done && !(l3dSel & +b.dataset.b)); });
+  $('l3dn').textContent = bits(l3dSel);
+  $('l3dchk').classList.toggle('hide', done); $('l3dchk').disabled = bits(l3dSel) !== 4;
+  if (done) {
+    $('l3dfb').innerHTML = '<div class="fb ok">🎉 Perfect – 4 photos, 4 <b>different</b> situations! Copies of the same “top view, bright light” photo teach the AI nothing new. Fair AI needs <b>enough</b> photos <b>and</b> <b>different</b> photos.</div>';
+    $('l3qs').classList.remove('hide');
+    qSeries('l3qs', L3_QS, 'l3q', 'QUESTION', () => afterButtons('l3next', [['ghost', 'Try Level 4 (optional) ➜', () => goLevel(4)]]));
+  } else $('l3qs').classList.add('hide');
+}
+$('l3dchk').onclick = () => {
+  act('l3d', {choice: l3dSel});
+  if (qDone(S.d, 'l3d', 1)) { l3dPaint(); }
+  else { const kinds = new Set(L3_PHOTOS.filter((p, i) => l3dSel & (1 << i)).map(p => p.join())).size;
+    $('l3dfb').innerHTML = `<div class="fb no">Your 4 photos show only <b>${kinds}</b> different situation${kinds > 1 ? 's' : ''}. Some photos are the same kind – swap them for something new.</div>`; }
 };
 /* L3 */
 let l3built = false;
@@ -979,8 +1091,8 @@ function l3show(){
   } else {
     $('l3msg').className = 'fb no'; $('l3msg').innerHTML = `Still unfair to: <b>${FOODS.filter(f => a[f.k] < L3_GOAL).map(f => f.e + ' ' + f.n).join(', ')}</b>. Change your photos and retrain.`;
   }
-  $('l3qs').classList.toggle('hide', !S.d.l3); $('l3next').classList.add('hide');
-  if (S.d.l3) qSeries('l3qs', L3_QS, 'l3q', 'QUESTION', () => afterButtons('l3next', [['ghost', 'Try Level 4 (optional) ➜', () => goLevel(4)]]));
+  $('l3next').classList.add('hide');
+  l3divInit();
 }
 /* L4 */
 function initL4(){
@@ -1115,7 +1227,9 @@ $('g2Start').onclick = () => {
 /* ---------- plenary ---------- */
 function renderPlenary(){
   renderQuiz('plenQ', PLEN_Q, 'plenary', () => {
+    const first = $('hotsBox').classList.contains('hide');
     $('hotsBox').classList.remove('hide');
+    if (first && !S.d.hots) { toast('🔥 Now answer the HOT question'); setTimeout(() => $('hotsBox').scrollIntoView({behavior: 'smooth', block: 'center'}), 300); }
     if (S.d.hots) { $('hotsIn').value = S.d.hots; $('hotsDone').classList.remove('hide'); $('btnHots').textContent = 'Update my answer'; }
   });
 }
