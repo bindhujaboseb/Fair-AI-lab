@@ -154,9 +154,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 .bcard .t{font-weight:700;margin-bottom:8px}
 .bcard .ch{display:flex;gap:6px}
 .bcard .ch button{flex:1;padding:7px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:700}
+.bcard .ch button.selA{background:#FEF3C7;border-color:#F59E0B}
+.mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:720px){.mcards{grid-template-columns:1fr}}
 .bcard .ch button.selB{background:#FEE2E2;border-color:#DC2626}.bcard .ch button.selF{background:#DCFCE7;border-color:#16A34A}
 .bcard.ok{border-color:#16A34A;background:#F0FDF4}
-.bcard .ch button:disabled{cursor:default;opacity:1}.bcard .ch button:disabled:not(.selB):not(.selF){opacity:.4}
+.bcard .ch button{color:var(--ink)}
+.bcard .ch button:disabled{cursor:default;opacity:1;color:var(--ink)}.bcard .ch button:disabled:not(.selB):not(.selF):not(.selA){opacity:.4}
 .pcards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:720px){.pcards{grid-template-columns:1fr 1fr}}
 .pcard{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px 8px;text-align:center;cursor:pointer;font-family:inherit;font-size:13.5px;color:var(--ink)}
@@ -339,6 +343,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
       <h3>📊 Training data chart</h3>
       <div class="bars" id="l1bars"></div><div class="barl" id="l1barl"></div>
       <div class="qbox"><div class="qnum">TASK 2</div><div class="qtext">Which food will the SmartCanteen AI find <u>hardest</u> to recognise?</div><div id="l1q"></div></div>
+      <div class="game hide" id="l1menu" style="margin-top:14px">
+        <h3>📋 Task 3 · Menu Check</h3>
+        <p class="sub" style="margin:0 0 8px">Here is today’s canteen menu. Compare it with the training data. For each food choose: <b>✅ Enough</b> (8 or more photos), <b>⚠️ Too few</b> (1–7 photos) or <b>❌ Missing</b> (no photos).</p>
+        <div class="mcards" id="l1mcards"></div>
+        <div class="row" style="margin-top:10px"><button class="btn sm" id="l1mchk" disabled>Check the menu</button></div>
+        <div id="l1mfb"></div>
+      </div>
     </div>
   </div>
 
@@ -504,14 +515,14 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 (function () {
 'use strict';
 /* ===================== SETTINGS ===================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhNlRb8ysP8IIJqjsXuxW66LF1DR0FRx0ncZORdkwMVh1lmqh_VQAl-wWvyOO8HpW0/exec';   // paste your Google Apps Script Web app link between the quotes
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbznkL0ILHm0PJwkE-EClLIlT38HtI3r401cYM4YGkD0gbyBjxSlOkJUQeSuzWW8v5rT/exec';   // paste your Google Apps Script Web app link between the quotes
 /* PINs are checked by the Google Sheet ("Settings" tab). The two PINs below are used ONLY in practice
    mode, when SHEET_URL above is empty. */
 const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456], l2b: [21], l3d: [172] };   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1], l5g: [51], l2s: [123456], l2b: [21], l3d: [172], l1m: [112223] };   // l1m = menu check: 1 enough, 2 too few, 3 missing   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -549,11 +560,12 @@ function applyEvent(d, e, p) {
       a.l1 = (a.l1 || 0) + 1;
       var ok = !!p.counts;
       for (k in TRAIN) if (!p.counts || Math.floor(+p.counts[k]) !== TRAIN[k]) ok = false;
-      if (ok && !d.l1c) d.l1c = a.l1 === 1 ? 15 : a.l1 === 2 ? 10 : 5;
+      if (ok && !d.l1c) d.l1c = a.l1 === 1 ? 12 : a.l1 === 2 ? 8 : 4;
       break;
-    case 'l1q': if (!d.l1c) break; a.l1q = (a.l1q || 0) + 1; if (!d.l1q && c === KEY.l1q) d.l1q = a.l1q === 1 ? 15 : 8; break;
+    case 'l1q': if (!d.l1c) break; a.l1q = (a.l1q || 0) + 1; if (!d.l1q && c === KEY.l1q) d.l1q = a.l1q === 1 ? 9 : 5; break;
+    case 'l1m': if (!d.l1q) break; qa(d, 'l1m', 0, c, 9, 5); break;
     case 'l2':
-      if (!d.l1q || !p.marks) break;
+      if (!qDone(d, 'l1m', 1) || !p.marks) break;
       a.l2 = (a.l2 || 0) + 1;
       var right = 0;
       for (var i = 0; i < 6; i++) if (Math.floor(+p.marks[i]) === L2_TRUTH[i]) right++;
@@ -591,7 +603,7 @@ function applyEvent(d, e, p) {
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
   var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
-  var l1 = (d.l1c || 0) + (d.l1q || 0), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
+  var l1 = (d.l1c || 0) + (d.l1q || 0) + qSum(d, 'l1m', 1), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 3) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
@@ -828,8 +840,8 @@ function renderQuiz(box, QS, ev, onDone){
 }
 
 /* ---------- levels ---------- */
-function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && !!d.l1q) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, !!d.l1q, qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
+function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && lvDone(1)) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
+function lvDone(n){ const d = S.d; return [0, !!d.l1q && qDone(d, 'l1m', 1), qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 3) && qDone(d, 'l5g', 1)][n]; }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
@@ -906,8 +918,38 @@ function showL1Chart(){
   mcq('l1q', FOODS.map(f => f.e + ' ' + f.n), j => j === KEY.l1q, !!S.d.l1q, 'l1q', {},
     'Correct! Samosa has only 1 training picture, so the AI hardly learned it. This group is under-represented.',
     'Not quite – look at the chart. Which bar is the shortest?',
-    () => { if (!$('l1q').querySelector('.btn')) nextBtn('l1q', 'Go to Level 2 ➜', 2); });
+    () => l1menuInit());
 }
+/* L1 task 3: Menu Check */
+const MENU = [['🍔','Burger'],['🍕','Pizza'],['🥙','Shawarma'],['🍛','Biryani'],['🥟','Samosa'],['🧆','Falafel']];
+const MCHOICE = [[1,'✅ Enough','selF'],[2,'⚠️ Too few','selA'],[3,'❌ Missing','selB']];
+let l1mSel = {}, l1mBuilt = false;
+function l1menuInit(){
+  $('l1menu').classList.remove('hide');
+  if (!l1mBuilt) { l1mBuilt = true;
+    $('l1mcards').innerHTML = MENU.map((m, i) => `<div class="bcard" id="mc${i}"><div class="t">${m[0]} ${m[1]}</div>
+      <div class="ch">${MCHOICE.map(c => `<button data-i="${i}" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>`).join('');
+    $('l1mcards').querySelectorAll('.ch button').forEach(b => b.onclick = () => { if (qDone(S.d, 'l1m', 1)) return; l1mSel[b.dataset.i] = +b.dataset.v; l1mPaint(); });
+  }
+  if (qDone(S.d, 'l1m', 1)) String(KEY.l1m[0]).split('').forEach((v, i) => l1mSel[i] = +v);
+  l1mPaint();
+}
+function l1mPaint(){
+  const done = qDone(S.d, 'l1m', 1);
+  MENU.forEach((m, i) => { $('mc' + i).querySelectorAll('button').forEach(b => { const c = MCHOICE.find(x => x[0] === +b.dataset.v); b.className = l1mSel[i] === +b.dataset.v ? c[2] : ''; b.disabled = done; }); $('mc' + i).classList.toggle('ok', done); });
+  $('l1mchk').classList.toggle('hide', done); $('l1mchk').disabled = Object.keys(l1mSel).length < MENU.length;
+  if (done) {
+    $('l1mfb').innerHTML = '<div class="fb ok">🎉 Correct! Shawarma, biryani and samosa are <b>under-represented</b> (too few photos). Falafel is <b>missing</b> – the AI has never seen it, so it can <b>never</b> recognise it. Both are kinds of bias.</div>';
+    if (!$('l1menu').querySelector(':scope > .btn')) nextBtn('l1menu', 'Go to Level 2 ➜', 2);
+  }
+}
+$('l1mchk').onclick = () => {
+  const code = +MENU.map((m, i) => l1mSel[i]).join('');
+  act('l1m', {choice: code});
+  if (qDone(S.d, 'l1m', 1)) l1mPaint();
+  else { const right = String(KEY.l1m[0]).split('').filter((v, i) => +v === l1mSel[i]).length;
+    $('l1mfb').innerHTML = `<div class="fb no">${right} of 6 are correct. Count again using the chart – and check: is every menu food in the training data?</div>`; }
+};
 /* L2 */
 let l2built = false;
 function initL2(){
