@@ -167,6 +167,13 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
 .pcard .e{font-size:34px;display:block;line-height:1.2}.pcard b{display:block;font-size:14px}
 .pcard.sel{border-color:var(--teal);background:#CCFBF1;font-weight:700}.pcard:disabled{cursor:default}
 .pcard.dup{opacity:.45}
+.audit{border-collapse:collapse;width:100%;max-width:560px;background:#fff;border-radius:12px;overflow:hidden}
+.audit th{background:#FEF3C7;text-align:left;padding:8px 10px}.audit td{padding:6px 10px;border-top:1px solid var(--line)}
+.audit input{width:90px;padding:6px 8px;font-size:16px;text-align:center}
+.audit input.good{border-color:#16A34A;background:#F0FDF4}.audit input.bad{border-color:#DC2626;background:#FEF2F2}
+.mfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:8px}
+@media(max-width:720px){.mfrow{grid-template-columns:1fr}}
+.mfrow select{font-size:15px;padding:8px}.mfrow.ok{border-color:#16A34A;background:#F0FDF4}
 .l5grid{display:grid;grid-template-columns:150px repeat(2,1fr);gap:10px;align-items:stretch}
 .l5grid .hdr{font-weight:800;text-align:center;align-self:center}
 .cell{border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}
@@ -409,6 +416,26 @@ body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-selec
       <div>AI systems in the UAE. Choose the best way to make each one fair.</div></div>
     <div class="topbar" id="l4top"></div>
     <div id="l4q"></div>
+    <div class="game hide" id="l4audit" style="margin-top:14px">
+      <h3>🧮 Activity 2 · Fairness Audit</h3>
+      <p class="sub" style="margin:0 0 8px">A Dubai library uses a face-check gate. The team tested it on <b>20 people from each group</b>. Work out the <b>accuracy %</b> for each group, then choose the group the gate is <b>unfair</b> to.</p>
+      <table class="audit"><tr><th>Group</th><th>Correct</th><th>Accuracy %</th></tr>
+        <tr><td>🧒 Children</td><td>18 / 20</td><td><input type="number" id="au0" min="0" max="100"> %</td></tr>
+        <tr><td>🧑‍🎓 Teens</td><td>19 / 20</td><td><input type="number" id="au1" min="0" max="100"> %</td></tr>
+        <tr><td>🧑 Adults</td><td>20 / 20</td><td><input type="number" id="au2" min="0" max="100"> %</td></tr>
+        <tr><td>👴 Grandparents</td><td>9 / 20</td><td><input type="number" id="au3" min="0" max="100"> %</td></tr></table>
+      <p style="margin:10px 0 6px"><b>The gate is unfair to:</b></p>
+      <div class="row" id="auPick"><button class="gchip" data-i="0">🧒 Children</button><button class="gchip" data-i="1">🧑‍🎓 Teens</button><button class="gchip" data-i="2">🧑 Adults</button><button class="gchip" data-i="3">👴 Grandparents</button></div>
+      <div class="row" style="margin-top:10px"><button class="btn sm orange" id="auChk">Check my audit</button><button class="btn sm ghost" id="auHint">💡 Hint</button></div>
+      <div id="auFb"></div>
+    </div>
+    <div class="game hide" id="l4match" style="margin-top:14px">
+      <h3>🔗 Activity 3 · Match the Fix</h3>
+      <p class="sub" style="margin:0 0 8px">Each AI below is unfair. Choose the <b>best fix</b> for each one.</p>
+      <div id="mfRows"></div>
+      <div class="row" style="margin-top:10px"><button class="btn sm orange" id="mfChk">Check my matches</button></div>
+      <div id="mfFb"></div>
+    </div>
     <div class="row hide nextrow" id="l4next" style="margin-top:12px"></div>
   </div>
 
@@ -522,7 +549,7 @@ const PRACTICE_PINS = { main: '1357', plenary: '8642' };
 /* ==================================================== */
 
 /* ===== SHARED SCORING RULES (identical in the student page and the Google Sheet script) ===== */
-var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1, 2, 1, 3, 1, 2, 0], l5g: [51], l2s: [123456], l2b: [21], l3d: [172], l1m: [112223] };   // l1m = menu check: 1 enough, 2 too few, 3 missing   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
+var KEY = { starter: [1, 1], plenary: [1, 2], l1q: 4, l2q: [1, 1], l3q: [1, 1], l4: [1, 1, 0, 1, 1], l5q: [2, 1, 1, 2, 1, 3, 1, 2, 0], l5g: [51], l2s: [123456], l2b: [21], l3d: [172], l1m: [112223], l4a: [900951000453], l4m: [2143] };   // l4a = audit %s + unfair group, l4m = matched fixes   // l1m = menu check: 1 enough, 2 too few, 3 missing   // l2b = cards in the 'Biased' bin, l3d = chosen samosa photos (bit masks)   // l2s = trays in order of AI confidence   // l5g = groups the old gate treated unfairly (bit mask)
 var TRAIN = { burger: 10, pizza: 8, shawarma: 3, biryani: 2, samosa: 1 };
 var L2_TRUTH = [1, 1, 0, 0, 0, 0];
 var L3_BUDGET = 20, L3_GOAL = 80;
@@ -549,6 +576,19 @@ function qa(d, ev, q, c, full, part) {
 function qDone(d, ev, n) { for (var i = 0; i < n; i++) if (!(d.qa && d.qa[ev + i] && d.qa[ev + i].pts != null)) return false; return true; }
 function qSum(d, ev, n) { var t = 0; for (var i = 0; i < n; i++) if (d.qa && d.qa[ev + i] && d.qa[ev + i].pts) t += d.qa[ev + i].pts; return t; }
 function l4All(d) { for (var i = 0; i < KEY.l4.length; i++) if (!d.l4 || d.l4[i] == null) return false; return true; }
+function l4Done(d) { return l4All(d) && qDone(d, 'l4a', 1) && qDone(d, 'l4m', 1); }
+function lvDoneD(d, n) {
+  if (n === 1) return !!d.l1q && qDone(d, 'l1m', 1);
+  if (n === 2) return qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2);
+  if (n === 3) return !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2);
+  if (n === 4) return l4Done(d);
+  if (n === 5) return !!d.l5 && qDone(d, 'l5g', 1) && qDone(d, 'l5q', 9);
+  return false;
+}
+function scFlags(d) {
+  var c4 = 0; for (var i = 0; i < (d.l4 || []).length; i++) if (d.l4[i] === 1) c4++;
+  return [!!d.l1q, lvDoneD(d, 2), (d.p && d.p[1] === 1) || c4 >= 2, !!d.l3];
+}
 function newData() { return { s: [], p: [], att: {}, l4: [], hots: '' }; }
 function applyEvent(d, e, p) {
   d.att = d.att || {}; d.s = d.s || []; d.p = d.p || []; d.l4 = d.l4 || [];
@@ -586,15 +626,17 @@ function applyEvent(d, e, p) {
     case 'l3d': if (!d.l3) break; qa(d, 'l3d', 0, c, 6, 3); break;
     case 'l3q': if (!qDone(d, 'l3d', 1)) break; if (q === 1 && !qDone(d, 'l3q', 1)) break; qa(d, 'l3q', q, c, 4, 2); break;
     case 'l4': if (!qDone(d, 'l3q', 2)) break; if (q >= 0 && q < KEY.l4.length && d.l4[q] == null) d.l4[q] = c === KEY.l4[q] ? 1 : 0; break;
+    case 'l4a': if (!l4All(d)) break; qa(d, 'l4a', 0, c, 10, 5); break;
+    case 'l4m': if (!qDone(d, 'l4a', 1)) break; qa(d, 'l4m', 0, c, 10, 5); break;
     case 'l5':
-      if (!l4All(d) || !qDone(d, 'l5g', 1)) break;
+      if (!l4Done(d) || !qDone(d, 'l5g', 1)) break;
       add = cleanAdd(p.add, L5_BASE, L5_BUDGET); if (!add) break;
       a.l5 = (a.l5 || 0) + 1; f = 100;
       for (k in L5_BASE) f = Math.min(f, acc5(L5_BASE[k] + add[k]));
       d.fair5 = f;
       if (f >= L5_GOAL && !d.l5) d.l5 = a.l5 <= 3 ? 20 : 12;
       break;
-    case 'l5g': if (!l4All(d)) break; qa(d, 'l5g', 0, c, 5, 3); break;
+    case 'l5g': if (!l4Done(d)) break; qa(d, 'l5g', 0, c, 5, 3); break;
     case 'l5q': if (!d.l5) break; if (q > 0 && !qDone(d, 'l5q', q)) break; qa(d, 'l5q', q, c, 5, 3); break;
     case 'hots': d.hots = String(p.text || '').slice(0, 400); break;
   }
@@ -602,13 +644,13 @@ function applyEvent(d, e, p) {
 }
 function scoreOf(d) {
   var cnt = function (arr) { var n = 0; for (var i = 0; i < (arr || []).length; i++) if (arr[i] === 1) n++; return n; };
-  var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4);
+  var starter = cnt(d.s), plen = cnt(d.p), l4 = cnt(d.l4) * 6 + qSum(d, 'l4a', 1) + qSum(d, 'l4m', 1);
   var l1 = (d.l1c || 0) + (d.l1q || 0) + qSum(d, 'l1m', 1), l2 = (d.l2c || 0) + qSum(d, 'l2s', 1) + qSum(d, 'l2b', 1) + qSum(d, 'l2q', 2), l3 = (d.l3 || 0) + qSum(d, 'l3d', 1) + qSum(d, 'l3q', 2), l5 = (d.l5 || 0) + qSum(d, 'l5q', 9) + qSum(d, 'l5g', 1);
   var main = l1 + l2 + l3;
   var band = main >= 80 ? 'Above expectation' : main >= 50 ? 'At expectation' : 'Working towards';
   return { starter: starter, plen: plen, l1: l1, l2: l2, l3: l3, l4: l4, l5: l5, main: main, band: band,
     fair: d.fair || 0, fair5: d.fair5 || 0,
-    points: starter * 10 + main + l4 * 10 + l5 + plen * 10 + (d.hots ? 10 : 0) };
+    points: starter * 10 + main + l4 + l5 + plen * 10 + (d.hots ? 10 : 0) };
 }
 /* ===== END SHARED ===== */
 
@@ -692,7 +734,7 @@ let S = load() || fresh();
 const toast = t => { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2800); };
 const sc = () => scoreOf(S.d);
 const pts = () => (SHEET_URL ? (S.srv != null ? S.srv : '…') : sc().points);
-const l4done = () => l4All(S.d);
+const l4done = () => l4Done(S.d);
 const qAnswered = (ev, i) => !!(S.d.qa && S.d.qa[ev + i] && S.d.qa[ev + i].pts != null);
 
 /* ---------- protection: edits made with Inspect are undone straight away ---------- */
@@ -723,14 +765,40 @@ document.querySelectorAll('.pinbox').forEach(el => {
 window.addEventListener('pagehide', () => document.querySelectorAll('.pinbox').forEach(el => el.value = ''));
 
 /* ---------- talking to the Google Sheet ---------- */
-let chain = Promise.resolve();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function send(body, tries){
+  for (let k = 0; k < tries; k++) {
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+      const r = await fetch(SHEET_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body, signal: ctl.signal});
+      clearTimeout(t);
+      const j = await r.json();
+      if (j && (j.ok || j.pinOk)) return j;
+    } catch (e) {}
+    await sleep(1500 * (k + 1) + Math.random() * 1500);   // the Sheet is busy: wait a little and try again
+  }
+  return null;
+}
+/* every answer waits in an outbox until the Google Sheet has saved it, so nothing is lost when the Sheet is busy */
+let flushing = false;
+async function flush(){
+  if (flushing || !SHEET_URL) return; flushing = true;
+  try {
+    while (S.outbox && S.outbox.length) {
+      const j = await send(S.outbox[0], 3);
+      if (!j) { setTimeout(flush, 8000 + Math.random() * 4000); break; }
+      S.outbox.shift(); save();
+      if (j.points != null && j.points !== '') { S.srv = +j.points; save(); paintWho(); }
+    }
+  } finally { flushing = false; }
+}
 function post(ev, p){
-  const body = JSON.stringify(Object.assign({ev, id:S.id, name:S.name, cls:S.cls, div:S.div}, p || {}));
-  if (!SHEET_URL) return Promise.resolve(null);
-  chain = chain.then(() => fetch(SHEET_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body})
-    .then(r => r.json()).then(j => { if (j && j.points != null && j.points !== '') { S.srv = +j.points; save(); paintWho(); } return j; })
-    .catch(() => null));
-  return chain;
+  if (!SHEET_URL || !S.id) return;
+  if (ev === 'login') S.seq = 0;
+  const seq = ev === 'login' ? 0 : (S.seq = (S.seq || 0) + 1);
+  S.outbox = S.outbox || [];
+  S.outbox.push(JSON.stringify(Object.assign({ev, id:S.id, name:S.name, cls:S.cls, div:S.div, seq}, p || {})));
+  save(); flush();
 }
 function act(ev, p){ applyEvent(S.d, ev, p || {}); save(); post(ev, p); paintWho(); paintGoal(); }
 let lastStage = '';
@@ -738,23 +806,26 @@ function sendStage(){ const st = S.phase === 'main' ? 'L' + S.level : S.phase; i
 async function checkPin(stage, input, msg){
   const pin = input.value.trim(); input.value = '';
   if (!pin) return false;
-  let ok;
-  if (!SHEET_URL) ok = pin === PRACTICE_PINS[stage];
-  else { msg.textContent = 'Checking…'; const j = await post('pin', {stage, pin}); ok = !!(j && j.pinOk); }
-  msg.textContent = ok ? '' : 'Wrong PIN';
-  return ok;
+  if (!SHEET_URL) { const ok = pin === PRACTICE_PINS[stage]; msg.textContent = ok ? '' : 'Wrong PIN'; return ok; }
+  msg.style.color = 'var(--muted)'; msg.textContent = 'Checking… please wait';
+  const j = await send(JSON.stringify({ev:'pin', stage, pin, id:S.id, name:S.name, cls:S.cls, div:S.div}), 4);
+  msg.style.color = '';
+  if (!j) { msg.textContent = 'The network is busy – please type the PIN and press the button again.'; return false; }
+  msg.textContent = j.pinOk ? '' : 'Wrong PIN';
+  return !!j.pinOk;
 }
 let pollT = null;
 function startPoll(){
   clearInterval(pollT); if (!SHEET_URL) return;
   pollT = setInterval(() => {
     if (S.phase !== 'gate' && S.phase !== 'check') { clearInterval(pollT); return; }
+    if (Math.random() < 0.3) return;   // spread the checks out so the Sheet is not flooded
     fetch(`${SHEET_URL}?action=status&id=${encodeURIComponent(S.id)}`).then(r => r.json()).then(d => {
       if (!d) return;
       if (S.phase === 'gate' && (d.approved === 'MAIN' || d.approved === 'YES')) { toast('▶ Your teacher opened “Explore about Bias”!'); setPhase('explore'); }
       else if (S.phase === 'check' && d.approved === 'YES') { toast('✔ Approved by your teacher!'); setPhase('plenary'); }
     }).catch(() => {});
-  }, 4000);
+  }, 5000);
 }
 
 /* ---------- navigation ---------- */
@@ -806,7 +877,7 @@ function paintStepper(){
 const esc = t => String(t || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- LO / SC card with automatic ticks ---------- */
-function scState(){ const d = S.d; return [!!d.l1q, qDone(d, 'l2q', 2), d.p[1] === 1 || (d.l4 || []).filter(x => x === 1).length >= 2, !!d.l3]; }
+function scState(){ return scFlags(S.d); }
 function paintGoal(){
   const st = scState(); let n = 0;
   $('scList').innerHTML = SCS.map(([k, t], i) => {
@@ -853,7 +924,7 @@ function renderQuiz(box, QS, ev, onDone){
 
 /* ---------- levels ---------- */
 function unlocked(n){ const d = S.d; return n === 1 || (n === 2 && lvDone(1)) || (n === 3 && qDone(d, 'l2q', 2)) || (n === 4 && lvDone(3)) || (n === 5 && l4done()); }
-function lvDone(n){ const d = S.d; return [0, !!d.l1q && qDone(d, 'l1m', 1), qDone(d, 'l2s', 1) && qDone(d, 'l2b', 1) && qDone(d, 'l2q', 2), !!d.l3 && qDone(d, 'l3d', 1) && qDone(d, 'l3q', 2), l4done(), !!d.l5 && qDone(d, 'l5q', 9) && qDone(d, 'l5g', 1)][n]; }
+function lvDone(n){ return lvDoneD(S.d, n); }
 function renderMain(){
   $('checkBanner').classList.toggle('hide', S.phase !== 'check');
   const names = ['', 'Level 1', 'Level 2', 'Level 3', 'Level 4 (optional)', '⭐ Level 5 Challenge'];
@@ -1160,8 +1231,67 @@ function initL4(){
       () => { if (!S.l4try[i]) { S.l4try[i] = 1; save(); setTimeout(initL4, 900); } });
   });
   checkBar('l4top', 'Level 4 is optional – you can go to your teacher check at any time.');
-  afterButtons('l4next', l4done() && S.l4try[L4_Q.length - 1] ? [['orange', '⭐ Try the Level 5 Challenge ➜', () => goLevel(5)]] : []);
+  const casesDone = l4All(S.d) && S.l4try[L4_Q.length - 1];
+  $('l4audit').classList.toggle('hide', !casesDone);
+  if (casesDone) auditInit();
+  afterButtons('l4next', l4done() ? [['orange', '⭐ Try the Level 5 Challenge ➜', () => goLevel(5)]] : []);
 }
+/* L4 activity 2: Fairness Audit */
+const AUDIT = [90, 95, 100, 45], AUDIT_UNFAIR = 3;
+let auPick = -1, auBuilt = false;
+function auditInit(){
+  if (!auBuilt) { auBuilt = true;
+    $('auPick').querySelectorAll('.gchip').forEach(b => b.onclick = () => { if (qDone(S.d, 'l4a', 1)) return; auPick = +b.dataset.i; auPaint(); });
+  }
+  if (qDone(S.d, 'l4a', 1)) { AUDIT.forEach((v, i) => $('au' + i).value = v); auPick = AUDIT_UNFAIR; }
+  auPaint();
+}
+function auPaint(){
+  const done = qDone(S.d, 'l4a', 1);
+  $('auPick').querySelectorAll('.gchip').forEach(b => { b.classList.toggle('sel', +b.dataset.i === auPick); b.disabled = done; });
+  [0,1,2,3].forEach(i => { $('au' + i).disabled = done; if (done) $('au' + i).className = 'good'; });
+  ['auChk','auHint'].forEach(id => $(id).classList.toggle('hide', done));
+  if (done) {
+    $('auFb').innerHTML = '<div class="fb ok">🎉 Correct! The gate works well for most groups (90–100%) but only <b>45%</b> for grandparents. A big gap like this is a sign of <b>bias</b> – the team needs more photos of older people.</div>';
+    $('l4match').classList.remove('hide'); matchInit();
+  } else $('l4match').classList.add('hide');
+}
+$('auHint').onclick = () => { $('auFb').innerHTML = '<div class="hint">💡 Accuracy % = correct ÷ 20 × 100. Because there are 20 people, you can also multiply the correct number by 5.</div>'; };
+$('auChk').onclick = () => {
+  const vals = [0,1,2,3].map(i => $('au' + i).value.trim());
+  if (vals.some(v => v === '') || auPick < 0) { $('auFb').innerHTML = '<div class="fb no">Fill in all four percentages and choose a group first.</div>'; return; }
+  const code = +(vals.map(v => String(Math.max(0, Math.min(999, Math.floor(+v) || 0))).padStart(3, '0')).join('') + auPick);
+  act('l4a', {choice: code});
+  if (qDone(S.d, 'l4a', 1)) { auPaint(); return; }
+  vals.forEach((v, i) => $('au' + i).className = +v === AUDIT[i] ? 'good' : 'bad');
+  const pctOk = vals.every((v, i) => +v === AUDIT[i]);
+  $('auFb').innerHTML = `<div class="fb no">${pctOk ? 'Your percentages are right! Now look again: which group has a much lower accuracy than the others?' : 'Some percentages are not right (red boxes). Use the 💡 Hint and try again.'}</div>`;
+};
+/* L4 activity 3: Match the Fix */
+const MF_FIXES = ['Add night-time photos and test the gate at night', 'Collect voice recordings from many different accents', 'Add photos of all skin tones and test every group', 'Use balanced hiring data and a human check'];
+const MF_PROBS = ['🗣️ A voice assistant often misunderstands Emirati Arabic accents.', '🛂 An airport Smart Gate often fails for travellers at night.', '💼 A hiring AI prefers men because past hiring was mostly men.', '🏥 A skin-check app misses problems on darker skin.'];
+let mfBuilt = false;
+function matchInit(){
+  if (!mfBuilt) { mfBuilt = true;
+    $('mfRows').innerHTML = MF_PROBS.map((p, i) => `<div class="mfrow" id="mf${i}"><div><b>${p}</b></div><select id="mfs${i}"><option value="">– choose a fix –</option>${MF_FIXES.map((f, k) => `<option value="${k + 1}">${f}</option>`).join('')}</select></div>`).join('');
+  }
+  const done = qDone(S.d, 'l4m', 1);
+  if (done) String(KEY.l4m[0]).split('').forEach((v, i) => { $('mfs' + i).value = v; });
+  MF_PROBS.forEach((p, i) => { $('mfs' + i).disabled = done; $('mf' + i).classList.toggle('ok', done); });
+  $('mfChk').classList.toggle('hide', done);
+  if (done) {
+    $('mfFb').innerHTML = '<div class="fb ok">🎉 All matched! Every fix does the same thing: it adds the <b>missing group</b> to the data and <b>tests the AI on everyone</b>.</div>';
+    afterButtons('l4next', [['orange', '⭐ Try the Level 5 Challenge ➜', () => goLevel(5)]]);
+  }
+}
+$('mfChk').onclick = () => {
+  const vals = MF_PROBS.map((p, i) => $('mfs' + i).value);
+  if (vals.some(v => !v)) { $('mfFb').innerHTML = '<div class="fb no">Choose a fix for every problem first.</div>'; return; }
+  act('l4m', {choice: +vals.join('')});
+  if (qDone(S.d, 'l4m', 1)) { matchInit(); return; }
+  const right = vals.filter((v, i) => v === String(KEY.l4m[0])[i]).length;
+  $('mfFb').innerHTML = `<div class="fb no">${right} of 4 are correct. For each problem ask: which group is missing from the data?</div>`;
+};
 /* L5 */
 const GROUPS = {cd:['🧒','Child','☀️ Day'], cn:['🧒','Child','🌙 Night'], ad:['🧑','Adult','☀️ Day'], an:['🧑','Adult','🌙 Night'], sd:['👵','Senior','☀️ Day'], sn:['👵','Senior','🌙 Night']};
 const GBITS = ['cd','cn','ad','an','sd','sn'];
@@ -1305,7 +1435,7 @@ function renderCert(){
   $('certDate').textContent = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
   $('certMore').innerHTML = !lvDone(3) ? '' : !l4done() ? '🎮 You can still try <b>Level 4</b> – click “Levels” at the top.'
     : !lvDone(5) ? '⭐ You unlocked the <b>Level 5 Smart Gate Challenge</b> – click “Levels” at the top!' : '🌟 Amazing – you completed every level!';
-  if (SHEET_URL) fetch(`${SHEET_URL}?action=status&id=${encodeURIComponent(S.id)}`).then(r => r.json()).then(d => { if (d && d.points !== undefined && d.points !== '') { S.srv = +d.points; save(); guard($('certPts'), String(S.srv)); paintWho(); } }).catch(() => {});
+  if (SHEET_URL) fetch(`${SHEET_URL}?action=status&need=points&id=${encodeURIComponent(S.id)}`).then(r => r.json()).then(d => { if (d && d.points !== undefined && d.points !== '') { S.srv = +d.points; save(); guard($('certPts'), String(S.srv)); paintWho(); } }).catch(() => {});
 }
 $('btnPrint').onclick = () => window.print();
 
@@ -1387,6 +1517,7 @@ $('btnBannerCheck').onclick = () => show('check');
 if (S.phase === 'confirm') S.phase = S.view = 'login';
 show(S.view || S.phase);
 if (S.phase === 'gate' || S.phase === 'check') startPoll();
+flush();
 })();
 </script>
 </body>
